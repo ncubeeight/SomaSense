@@ -48,6 +48,8 @@ node bake-shapes.js <makehuman data dir> <scratch dir>
 
 ## Credits
 
-Authored by ncubeeight LLC. Body models are provided by MakeHuman; see its [license](https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md). The app bundles [Preact](https://preactjs.com) (see `tools/web/preact-LICENSE.txt`) and the Atkinson Hyperlegible font.
+Authored by ncubeeight LLC. Body models are provided by MakeHuman; its body data is released under CC0, as its [license](https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md) explains. The app bundles [Preact](https://preactjs.com) (MIT, see `tools/web/preact-LICENSE.txt`) and the Atkinson Hyperlegible font (SIL Open Font License, see `tools/web/atkinson-OFL.txt`).
 
-No license has been chosen for this repository yet.
+## License
+
+Licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for third-party material, which keeps its own terms.

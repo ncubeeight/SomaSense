@@ -1,0 +1,13 @@
+SomaSense
+Copyright 2026 ncubeeight LLC
+
+This project includes third-party material under its own terms:
+
+- Body model data (base mesh, targets and rig data) derived from MakeHuman,
+  released under CC0 1.0 Universal.
+  https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md
+
+- Preact, under the MIT License. See tools/web/preact-LICENSE.txt.
+
+- Atkinson Hyperlegible font, Copyright 2020 Braille Institute of America, Inc.,
+  under the SIL Open Font License 1.1. See tools/web/atkinson-OFL.txt.

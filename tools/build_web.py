@@ -62,7 +62,7 @@ if OUT.exists():
     shutil.rmtree(OUT)
 (OUT / 'frames').mkdir(parents=True)
 (OUT / 'index.html').write_text(page)
-for name in ['preact.umd.js', 'runtime.js', 'atkinson-400.woff2', 'atkinson-700.woff2']:
+for name in ['preact.umd.js', 'preact-LICENSE.txt', 'runtime.js', 'atkinson-400.woff2', 'atkinson-700.woff2', 'atkinson-OFL.txt']:
     shutil.copy(WEB / name, OUT / name)
 shutil.copy(mesh / 'body-mesh.json', OUT / 'body-mesh.json')
 shutil.copy(mesh / 'body-shapes.json', OUT / 'body-shapes.json')
