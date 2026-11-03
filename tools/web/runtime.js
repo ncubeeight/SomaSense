@@ -82,7 +82,7 @@
   window.startApp = function (Logic) {
     const mount = document.getElementById('app');
     let ref = null;
-    const draw = () => render(h(Logic, { startScreen: 'home', phoneH: window.innerHeight, ref: (c) => { if (c) ref = c; } }), mount);
+    const draw = () => render(h(Logic, { startScreen: 'home', live: true, phoneH: window.innerHeight, ref: (c) => { if (c) ref = c; } }), mount);
     window.addEventListener('resize', draw);
     window.appBack = () => (ref && ref.handleBack ? ref.handleBack() : false);
     draw();

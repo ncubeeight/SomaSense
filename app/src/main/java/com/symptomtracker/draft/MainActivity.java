@@ -5,11 +5,14 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.AtomicFile;
+import android.util.Base64;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
@@ -22,8 +25,12 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.window.OnBackInvokedDispatcher;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Map;
 
 /** Hosts the prototype in a WebView, serving every file from the APK's assets. */
@@ -87,11 +94,95 @@ public class MainActivity extends Activity {
         frame.postDelayed(() -> getWindow().getInsetsController().setSystemBarsAppearance(light, light), SPLASH_FADE_MS / 2);
     }
 
+    private AtomicFile dataFile() {
+        return new AtomicFile(new File(getFilesDir(), "somasense-log.json"));
+    }
+
     private final class Shell {
         @JavascriptInterface
         public void splashFading() {
             runOnUiThread(MainActivity.this::endSplash);
         }
+
+        /** The saved log, or an empty string before anything has been saved. */
+        @JavascriptInterface
+        public String readData() throws IOException {
+            AtomicFile file = dataFile();
+            if (!file.getBaseFile().exists()) return "";
+            return new String(file.readFully(), StandardCharsets.UTF_8);
+        }
+
+        @JavascriptInterface
+        public boolean writeData(String json) {
+            AtomicFile file = dataFile();
+            FileOutputStream out = null;
+            try {
+                out = file.startWrite();
+                out.write(json.getBytes(StandardCharsets.UTF_8));
+                file.finishWrite(out);
+                return true;
+            } catch (IOException e) {
+                if (out != null) file.failWrite(out);
+                return false;
+            }
+        }
+
+        /** Keeps an unreadable log on the device instead of letting new saves replace it. */
+        @JavascriptInterface
+        public void setAsideData() {
+            File base = dataFile().getBaseFile();
+            base.renameTo(new File(base.getParentFile(), "somasense-log-unreadable-" + System.currentTimeMillis() + ".json"));
+        }
+
+        /** Removes the log, its backup, any set-aside copies and any shared files. */
+        @JavascriptInterface
+        public boolean clearData() {
+            dataFile().delete();
+            boolean gone = !dataFile().getBaseFile().exists();
+            File[] files = getFilesDir().listFiles((dir, name) -> name.startsWith("somasense-log"));
+            if (files != null) for (File f : files) gone &= f.delete();
+            clearShareFiles();
+            return gone;
+        }
+
+        @JavascriptInterface
+        public boolean shareLog(String subject, String body, String baseName, String calendarBase64, String pdfBase64) {
+            clearShareFiles();
+            File dir = new File(getCacheDir(), ShareProvider.DIR);
+            dir.mkdirs();
+            String name = new File(baseName).getName();
+            File picture = new File(dir, name + "-calendar.png");
+            File pdf = new File(dir, name + ".pdf");
+            try (FileOutputStream a = new FileOutputStream(picture); FileOutputStream b = new FileOutputStream(pdf)) {
+                a.write(Base64.decode(calendarBase64, Base64.DEFAULT));
+                b.write(Base64.decode(pdfBase64, Base64.DEFAULT));
+            } catch (IOException e) {
+                return false;
+            }
+            ArrayList<Uri> uris = new ArrayList<>();
+            uris.add(shareUri(picture));
+            uris.add(shareUri(pdf));
+            ClipData clip = ClipData.newRawUri(name, uris.get(0));
+            clip.addItem(new ClipData.Item(uris.get(1)));
+            Intent send = new Intent(Intent.ACTION_SEND_MULTIPLE)
+                    .setType("*/*")
+                    .putExtra(Intent.EXTRA_SUBJECT, subject)
+                    .putExtra(Intent.EXTRA_TEXT, body)
+                    .putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            send.setClipData(clip);
+            runOnUiThread(() -> startActivity(Intent.createChooser(send, subject)));
+            return true;
+        }
+    }
+
+    private Uri shareUri(File file) {
+        return new Uri.Builder().scheme("content").authority(ShareProvider.AUTHORITY).appendPath(file.getName()).build();
+    }
+
+    private void clearShareFiles() {
+        File[] old = new File(getCacheDir(), ShareProvider.DIR).listFiles();
+        if (old != null) for (File f : old) f.delete();
     }
 
     private final class AssetClient extends WebViewClient {

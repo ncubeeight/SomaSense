@@ -102,9 +102,15 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 
 <sc-if value="{{isCalendar}}" hint-placeholder-val="{{false}}">
 <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 80px; overflow-y: auto">
-  <div style="padding: 16px 16px 8px">
-    <h1 style="margin: 0; font-size: 24px">Calendar</h1>
-    <div style="font-size: 14px; color: #4F6368">Where and when symptoms were reported</div>
+  <div style="padding: 16px 16px 8px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">Calendar</h1>
+      <div style="font-size: 14px; color: #4F6368">Where and when symptoms were reported</div>
+    </div>
+    <button type="button" onClick="{{startShare}}" style="flex: none; height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid #0B6169; background: #FFFFFF; color: #0B6169; font: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"></path><path d="M8 8l4-4 4 4"></path><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"></path></svg>
+      Share
+    </button>
   </div>
   <div style="display: flex; gap: 8px; padding: 4px 16px 8px; overflow-x: auto">
     <sc-for list="{{areaChips}}" as="c" hint-placeholder-count="5">
@@ -214,6 +220,11 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">If code is forked please attribute <a href="https://ncubeeight.github.io/SomaSense/" target="_blank" rel="noopener" style="color: #0B6169; font-weight: 700; overflow-wrap: anywhere">ncubeeight.github.io/SomaSense</a></p>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense was coded in ClaudeCode with supplemental support by Apple Xcode and Google Play Console, with additional support by Google Gemini for marketing collateral design.</p>
     <p style="margin: 0; font-size: 15px; line-height: 1.45">The body models used in SomaSense are provided by MakeHuman under open source license available to review here: <a href="https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md" target="_blank" rel="noopener" style="color: #0B6169; font-weight: 700; overflow-wrap: anywhere">https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md</a></p>
+  </div>
+  <div style="margin: 0 12px 16px; background: #FFFFFF; border: 1px solid #D3DCDC; border-radius: 16px; padding: 14px">
+    <h2 style="margin: 0 0 8px; font-size: 18px">Your data</h2>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">This removes every report, symptom-free day and body shape setting from this phone. It can’t be undone. Anything you already shared isn’t affected.</p>
+    <button type="button" onClick="{{wipeData}}" style="width: 100%; min-height: 48px; border-radius: 24px; border: 1px solid #B8430F; background: {{wipeBg}}; color: {{wipeFg}}; font: inherit; font-weight: 700; cursor: pointer">{{wipeLabel}}</button>
   </div>
 </div>
 </sc-if>
@@ -456,6 +467,27 @@ input, textarea { -webkit-user-select: text; user-select: text; }
         <div style="font-size: 15px">{{d.v}}</div>
       </div>
     </sc-for>
+    <button type="button" onClick="{{deleteReport}}" style="width: 100%; height: 48px; margin-top: 8px; border-radius: 24px; border: 1px solid #B8430F; background: {{deleteBg}}; color: {{deleteFg}}; font: inherit; font-weight: 700; cursor: pointer">{{deleteLabel}}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasShare}}" hint-placeholder-val="{{false}}">
+<div role="dialog" aria-label="Share this month's log" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 4; background: #F3F6F6; display: flex; flex-direction: column">
+  <div style="flex: none; display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: #FFFFFF; border-bottom: 1px solid #D3DCDC">
+    <button type="button" aria-label="Close" onClick="{{closeShare}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+    </button>
+    <h2 style="margin: 0; font-size: 18px">Share this month’s log</h2>
+  </div>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px">
+    <sc-for list="{{sharePreviewPages}}" as="pg" hint-placeholder-count="1">
+      <img src="{{pg}}" alt="Page of the shared log: a calendar of the month colored by severity, then the entries" style="display: block; width: 100%; height: auto; flex: none; border: 1px solid #D3DCDC; border-radius: 4px; box-sizing: border-box">
+    </sc-for>
+  </div>
+  <div style="flex: none; padding: 12px 16px; background: #FFFFFF; border-top: 1px solid #D3DCDC">
+    <div style="font-size: 13px; color: #4F6368; margin-bottom: 8px">This sends everything logged this month. You choose the app and the recipient next.</div>
+    <button type="button" onClick="{{sendShare}}" style="width: 100%; height: 52px; border: 0; border-radius: 26px; background: #0B6169; color: #FFFFFF; font: inherit; font-weight: 700; cursor: pointer">Share</button>
   </div>
 </div>
 </sc-if>
@@ -479,7 +511,8 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.TODAY = '2026-10-27';
+    this.live = !!props.live && typeof window !== 'undefined' && !!window.AppShell;
+    this.TODAY = this.live ? this.iso(new Date()) : '2026-10-27';
     this.CATS = ['Pain', 'Tingling / numbness', 'Rash / skin', 'Itching', 'Burning', 'Swelling', 'Stiffness', 'Other'];
     this.MEDS = ['Ibuprofen', 'Gabapentin', 'Antihistamine', 'Topical cream'];
     this.ACTS = ['Resting', 'Sleeping', 'Walking', 'Exercise', 'Desk work', 'Driving', 'Housework'];
@@ -498,6 +531,7 @@ class Component extends DCLogic {
     this.FRAMES = ["frames/body-000.png", "frames/body-005.png", "frames/body-010.png", "frames/body-015.png", "frames/body-020.png", "frames/body-025.png", "frames/body-030.png", "frames/body-035.png", "frames/body-040.png", "frames/body-045.png", "frames/body-050.png", "frames/body-055.png", "frames/body-060.png", "frames/body-065.png", "frames/body-070.png", "frames/body-075.png", "frames/body-080.png", "frames/body-085.png", "frames/body-090.png", "frames/body-095.png", "frames/body-100.png", "frames/body-105.png", "frames/body-110.png", "frames/body-115.png", "frames/body-120.png", "frames/body-125.png", "frames/body-130.png", "frames/body-135.png", "frames/body-140.png", "frames/body-145.png", "frames/body-150.png", "frames/body-155.png", "frames/body-160.png", "frames/body-165.png", "frames/body-170.png", "frames/body-175.png", "frames/body-180.png"];
     const start = props.startScreen || 'home';
     const form = this.blankForm();
+    const saved = this.live ? this.loadData() : null;
     let selected = [];
     if (start === 'selected' || start === 'report') {
       selected = [this.zonePoint('f-forearm-L'), this.zonePoint('f-hand-L'), this.zonePoint('f-knee-R')];
@@ -515,16 +549,19 @@ class Component extends DCLogic {
     this.state = {
       tab: start === 'calendar' ? 'calendar' : start === 'reports' ? 'reports' : 'home',
       zoom: 1, panX: 0, panY: 0, glFailed: false,
-      symptomFree: ['2026-10-16', '2026-10-23'],
+      symptomFree: this.live ? saved.symptomFree : ['2026-10-16', '2026-10-23'],
       shape: { g: 0, b: 0 }, shapesFailed: false, thumbRev: 0,
       splash: start === 'home' ? 'in' : 'off', splashImg: false,
       composing: start === 'report',
       yaw: 0,
       selected: selected,
       form: form,
-      reports: this.seedReports(),
+      reports: this.live ? saved.reports : this.seedReports(),
+      deleteArmed: false,
+      wipeArmed: false,
+      share: null,
       homeDay: this.TODAY,
-      calMonth: '2026-10',
+      calMonth: this.TODAY.slice(0, 7),
       calDay: this.TODAY,
       area: 'all',
       range: 30,
@@ -534,8 +571,44 @@ class Component extends DCLogic {
     };
   }
 
+  nowTime() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  loadData() {
+    const empty = { reports: [], symptomFree: [] };
+    let text = '';
+    try {
+      text = window.AppShell.readData();
+      if (!text) return empty;
+      const data = JSON.parse(text);
+      return { reports: data.reports || [], symptomFree: data.symptomFree || [] };
+    } catch (e) {
+      // An unreadable file is set aside rather than overwritten.
+      window.AppShell.setAsideData();
+      this.loadFailed = true;
+      return empty;
+    }
+  }
+  // Points are stored on the default body, so the chosen shape can be applied to them at launch.
+  diskPoint(pt) {
+    let p = pt.p;
+    if (this.BODY.ready() && this.shapeVer > 0) {
+      const P = this.BODY.positions(), B = this.BODY.basePositions();
+      if (pt.v === undefined) pt.v = this.BODY.nearest(pt.p);
+      p = [0, 1, 2].map((k) => B[pt.v + k] + pt.p[k] - P[pt.v + k]);
+    }
+    const round = (v) => Math.round(v * 100) / 100;
+    return { id: pt.id, p: p.map(round), n: pt.n.map(round), label: pt.label, area: pt.area };
+  }
+  saveData(reports, symptomFree) {
+    if (!this.live) return;
+    const json = JSON.stringify({ v: 1, reports: reports.map((r) => ({ ...r, points: r.points.map((p) => this.diskPoint(p)) })), symptomFree: symptomFree });
+    if (!window.AppShell.writeData(json)) this.flash('This could not be saved. Check the phone’s free storage.');
+  }
   blankForm() {
-    return { time: '14:30', cats: [], desc: '', severity: 4, sevNote: '', meds: [], medOther: '', acts: [], actOther: '', senses: [], senseOther: '', concern: '' };
+    this.formDefault = this.live ? this.nowTime() : '14:30';
+    return { time: this.formDefault, cats: [], desc: '', severity: 4, sevNote: '', meds: [], medOther: '', acts: [], actOther: '', senses: [], senseOther: '', concern: '' };
   }
 
   bodyModel() {
@@ -702,7 +775,7 @@ class Component extends DCLogic {
         }
         return name('Body', 'torso');
       }
-      return { setMesh, setOffsets, nearest, positions: () => P, toScreen, viewDir, cast, classify, ready: () => !!P };
+      return { setMesh, setOffsets, nearest, positions: () => P, basePositions: () => P0, toScreen, viewDir, cast, classify, ready: () => !!P };
     }
     return makeBody();
   }
@@ -724,6 +797,8 @@ class Component extends DCLogic {
   componentDidMount() {
     // If the image never reports back, the app still opens.
     if (this.state.splash === 'in') this.splashTimer = setTimeout(() => this.splashOut(), 3000);
+    if (this.loadFailed) setTimeout(() => this.flash('Your saved log could not be read, so it was set aside.'), 4000);
+    if (this.live) document.addEventListener('visibilitychange', () => this.rollDate());
     fetch('body-mesh.json').then((r) => r.json()).then((data) => {
       this.BODY.setMesh(data);
       this.meshData = data;
@@ -821,6 +896,17 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { clearTimeout(this.toastTimer); clearInterval(this.snapTimer); clearTimeout(this.splashTimer); }
 
+  // The app can stay open past midnight.
+  rollDate() {
+    const now = this.iso(new Date()), was = this.TODAY;
+    if (now === was) return;
+    this.TODAY = now;
+    this.setState((s) => ({
+      homeDay: s.homeDay === was ? now : s.homeDay,
+      calDay: s.calDay === was ? now : s.calDay,
+      calMonth: s.calDay === was ? now.slice(0, 7) : s.calMonth
+    }));
+  }
   calmMotion() {
     return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
@@ -957,7 +1043,8 @@ class Component extends DCLogic {
   }
   handleBack() {
     const s = this.state;
-    if (s.detailId) { this.setState({ detailId: null }); return true; }
+    if (s.share) { this.setState({ share: null }); return true; }
+    if (s.detailId) { this.setState({ detailId: null, deleteArmed: false }); return true; }
     if (s.composing) { this.setState({ composing: false }); return true; }
     if (s.tab !== 'home') { this.setState({ tab: 'home' }); return true; }
     if (s.zoom > 1) { this.setState(this.resetZoom()); return true; }
@@ -1256,8 +1343,29 @@ class Component extends DCLogic {
       setBodyB: pick('b'),
       bodyIsDefault: isDefault,
       bodyResetColor: isDefault ? '#A5B4B5' : '#0B6169',
-      resetBody: () => this.setBody({ g: 0, b: 0 })
+      resetBody: () => this.setBody({ g: 0, b: 0 }),
+      wipeLabel: s.wipeArmed ? 'Tap again to delete everything' : 'Delete stored on-device data',
+      wipeBg: s.wipeArmed ? '#B8430F' : '#FFFFFF',
+      wipeFg: s.wipeArmed ? '#FFFFFF' : '#B8430F',
+      wipeData: () => this.wipeData()
     };
+  }
+  wipeData() {
+    clearTimeout(this.wipeTimer);
+    if (!this.state.wipeArmed) {
+      this.setState({ wipeArmed: true });
+      this.wipeTimer = setTimeout(() => this.setState({ wipeArmed: false }), 5000);
+      return;
+    }
+    if (this.live && !window.AppShell.clearData()) {
+      this.setState({ wipeArmed: false });
+      this.flash('The data could not be deleted. Please try again.');
+      return;
+    }
+    this.setBody({ g: 0, b: 0 });
+    try { localStorage.clear(); } catch (e) { /* nothing was stored */ }
+    this.setState({ wipeArmed: false, reports: [], symptomFree: [], selected: [], form: this.blankForm(), composing: false, detailId: null, deleteArmed: false, share: null });
+    this.flash('All stored data was deleted');
   }
   removePin(id) { this.setState((s) => ({ selected: s.selected.filter((p) => p.id !== id) })); }
 
@@ -1270,7 +1378,9 @@ class Component extends DCLogic {
       meds: extra(f.meds, f.medOther), acts: extra(f.acts, f.actOther), senses: extra(f.senses, f.senseOther), concern: f.concern
     };
     const n = s.selected.length;
-    this.setState({ reports: [rep].concat(s.reports), symptomFree: s.symptomFree.filter((d) => d !== rep.date), selected: [], form: this.blankForm(), composing: false, tab: 'home', ...this.resetZoom(), calDay: s.homeDay, calMonth: s.homeDay.slice(0, 7) });
+    const reports = [rep].concat(s.reports), symptomFree = s.symptomFree.filter((d) => d !== rep.date);
+    this.saveData(reports, symptomFree);
+    this.setState({ reports: reports, symptomFree: symptomFree, selected: [], form: this.blankForm(), composing: false, tab: 'home', ...this.resetZoom(), calDay: s.homeDay, calMonth: s.homeDay.slice(0, 7) });
     this.flash('Report saved with ' + this.plural(n, 'point'));
   }
 
@@ -1338,7 +1448,11 @@ class Component extends DCLogic {
       homeBottom: s.selected.length > 0 ? '0px' : '80px',
       selectedSummary: this.plural(s.selected.length, 'point') + ' marked · ' + names.join(', '),
       clearPins: () => this.setState({ selected: [] }),
-      startCompose: () => this.setState({ composing: true, ...this.resetZoom() })
+      startCompose: () => {
+        const f = this.state.form;
+        const time = this.live && f.time === this.formDefault ? (this.formDefault = this.nowTime()) : f.time;
+        this.setState({ composing: true, form: { ...f, time: time }, ...this.resetZoom() });
+      }
     };
   }
 
@@ -1431,7 +1545,12 @@ class Component extends DCLogic {
       calCanMarkFree: s.calDay <= this.TODAY && !s.reports.some((r) => r.date === s.calDay),
       calDayFree: dayFree,
       freeBg: dayFree ? '#8EDB8F' : '#FFFFFF',
-      toggleFree: () => this.setState((q) => ({ symptomFree: q.symptomFree.includes(q.calDay) ? q.symptomFree.filter((d) => d !== q.calDay) : q.symptomFree.concat([q.calDay]) })),
+      toggleFree: () => {
+        const q = this.state;
+        const symptomFree = q.symptomFree.includes(q.calDay) ? q.symptomFree.filter((d) => d !== q.calDay) : q.symptomFree.concat([q.calDay]);
+        this.saveData(q.reports, symptomFree);
+        this.setState({ symptomFree: symptomFree });
+      },
       calDayHas: dayList.length > 0,
       calFrontDots: dots(true),
       calBackDots: dots(false),
@@ -1511,6 +1630,25 @@ class Component extends DCLogic {
     const s = this.state;
     const r = s.reports.find((q) => q.id === s.detailId);
     if (!r) return { hasDetail: false, detail: { cats: '', when: '', rows: [] }, closeDetail: () => {} };
+    const armed = s.deleteArmed;
+    return {
+      hasDetail: true,
+      detail: { cats: r.cats.join(', '), when: this.fmtDay(r.date) + ' at ' + this.fmtTime(r.time), rows: this.reportRows(r) },
+      closeDetail: () => this.setState({ detailId: null, deleteArmed: false }),
+      deleteLabel: armed ? 'Tap again to delete for good' : 'Delete report',
+      deleteBg: armed ? '#B8430F' : '#FFFFFF',
+      deleteFg: armed ? '#FFFFFF' : '#B8430F',
+      deleteReport: () => {
+        if (!this.state.deleteArmed) { this.setState({ deleteArmed: true }); return; }
+        const reports = this.state.reports.filter((q) => q.id !== r.id);
+        this.saveData(reports, this.state.symptomFree);
+        this.setState({ reports: reports, detailId: null, deleteArmed: false });
+        this.flash('Report deleted');
+      }
+    };
+  }
+
+  reportRows(r) {
     const rows = [
       { k: 'Where', v: r.points.map((p) => p.label).join(', ') },
       { k: 'Severity', v: r.severity + ' out of 10 · ' + this.sevWord(r.severity) + (r.sevNote ? '. ' + r.sevNote : '') }
@@ -1521,10 +1659,239 @@ class Component extends DCLogic {
     add('Physical activity', r.acts);
     add('Other sensations', r.senses);
     add('Concerns', r.concern);
+    return rows;
+  }
+
+  // ---- Shared log: a calendar picture on top, then every entry for the month ----
+  shareEntries(month) {
+    const s = this.state;
+    const list = s.reports.filter((r) => r.date.slice(0, 7) === month).map((r) => ({ date: r.date, time: r.time, r: r }));
+    s.symptomFree.filter((d) => d.slice(0, 7) === month && !s.reports.some((r) => r.date === d)).forEach((d) => list.push({ date: d, time: '', r: null }));
+    return list.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  }
+  shareSummary(list) {
+    const reports = list.filter((x) => x.r);
+    const days = new Set(reports.map((x) => x.date)).size, free = list.length - reports.length;
+    return this.plural(reports.length, 'report') + ' on ' + this.plural(days, 'day') + ' · ' + this.plural(free, 'symptom-free day');
+  }
+  sharePages(month) {
+    const W = 1224, H = 1584, M = 84, BOTTOM = H - 110;
+    const font = (w, px) => w + ' ' + px + 'px "Atkinson Hyperlegible", system-ui, sans-serif';
+    const INK = '#14282C', SOFT = '#4F6368', LINE = '#D3DCDC';
+    const meas = document.createElement('canvas').getContext('2d');
+    const wrap = (text, f, width) => {
+      meas.font = f;
+      const out = [];
+      String(text).split(/\r?\n/).forEach((para) => {
+        let line = '';
+        para.split(' ').forEach((word) => {
+          const tryLine = line ? line + ' ' + word : word;
+          if (meas.measureText(tryLine).width <= width) { line = tryLine; return; }
+          if (line) out.push(line);
+          line = word;
+          while (meas.measureText(line).width > width) {
+            let n = line.length - 1;
+            while (n > 1 && meas.measureText(line.slice(0, n)).width > width) n--;
+            out.push(line.slice(0, n));
+            line = line.slice(n);
+          }
+        });
+        out.push(line);
+      });
+      return out;
+    };
+    const parts = month.split('-').map(Number);
+    const first = new Date(parts[0], parts[1] - 1, 1);
+    const title = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const daysIn = new Date(parts[0], parts[1], 0).getDate();
+    const list = this.shareEntries(month);
+    const blocks = [];
+    const block = (h, draw, keep) => blocks.push({ h: h, draw: draw, keep: !!keep });
+    const text = (c, str, x, y, f, color) => { c.font = f; c.fillStyle = color; c.fillText(str, x, y); };
+
+    // Heading.
+    block(150, (c, y) => {
+      text(c, 'SomaSense', M, y + 52, font(700, 52), INK);
+      text(c, 'Symptom log · ' + title, M, y + 100, font(400, 32), INK);
+      text(c, this.shareSummary(list), M, y + 140, font(400, 26), SOFT);
+    });
+
+    // The calendar picture.
+    const cellW = (W - 2 * M) / 7, cellH = 118, lead = first.getDay();
+    const rows = Math.ceil((lead + daysIn) / 7);
+    block(50 + rows * cellH + 90, (c, y) => {
+      c.textAlign = 'center';
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((d, i) => text(c, d, M + cellW * (i + 0.5), y + 34, font(700, 24), SOFT));
+      for (let d = 1; d <= daysIn; d++) {
+        const key = month + '-' + String(d).padStart(2, '0');
+        const dayList = this.state.reports.filter((r) => r.date === key);
+        const max = dayList.reduce((m, r) => Math.max(m, r.severity), 0);
+        const free = !dayList.length && this.state.symptomFree.includes(key);
+        const at = lead + d - 1, x = M + (at % 7) * cellW, top = y + 50 + Math.floor(at / 7) * cellH;
+        c.fillStyle = free ? '#8EDB8F' : !dayList.length ? '#FFFFFF' : max <= 3 ? '#D6ECEC' : max <= 6 ? '#86C6C4' : '#0B6169';
+        c.strokeStyle = LINE;
+        c.lineWidth = 2;
+        c.beginPath();
+        c.roundRect(x + 4, top + 4, cellW - 8, cellH - 8, 14);
+        c.fill();
+        c.stroke();
+        const fg = dayList.length && max > 6 ? '#FFFFFF' : INK;
+        text(c, String(d), x + cellW / 2, top + 54, font(700, 30), fg);
+        if (dayList.length) text(c, this.plural(dayList.length, 'report'), x + cellW / 2, top + 90, font(400, 21), fg);
+        if (free) {
+          c.strokeStyle = INK;
+          c.lineWidth = 4;
+          c.lineCap = 'round';
+          c.lineJoin = 'round';
+          const cx = x + cellW / 2, cy = top + 82;
+          c.beginPath();
+          c.moveTo(cx - 13, cy);
+          c.lineTo(cx - 4, cy + 9);
+          c.lineTo(cx + 13, cy - 9);
+          c.stroke();
+        }
+      }
+      c.textAlign = 'left';
+      let x = M;
+      const keyTop = y + 50 + rows * cellH + 22;
+      [['#FFFFFF', 'No entry'], ['#8EDB8F', 'No symptoms'], ['#D6ECEC', 'Mild (1–3)'], ['#86C6C4', 'Moderate (4–6)'], ['#0B6169', 'Severe (7–10)']].forEach((k) => {
+        c.fillStyle = k[0];
+        c.strokeStyle = LINE;
+        c.lineWidth = 2;
+        c.beginPath();
+        c.roundRect(x, keyTop, 28, 28, 6);
+        c.fill();
+        c.stroke();
+        c.font = font(400, 23);
+        c.fillStyle = SOFT;
+        c.fillText(k[1], x + 36, keyTop + 22);
+        x += 36 + c.measureText(k[1]).width + 30;
+      });
+    });
+
+    // Entries, in the same format as a report in the app.
+    block(70, (c, y) => text(c, 'Entries', M, y + 50, font(700, 36), INK), true);
+    if (!list.length) block(50, (c, y) => text(c, 'Nothing was logged this month.', M, y + 34, font(400, 28), SOFT));
+    list.forEach((x) => {
+      const when = this.fmtDay(x.date) + (x.r ? ' at ' + this.fmtTime(x.time) : '');
+      block(12, (c, y) => { c.fillStyle = LINE; c.fillRect(M, y + 4, W - 2 * M, 2); }, true);
+      if (!x.r) {
+        block(58, (c, y) => {
+          text(c, when, M, y + 36, font(700, 28), INK);
+          c.font = font(700, 28);
+          text(c, 'No symptoms', W - M - c.measureText('No symptoms').width, y + 36, font(700, 28), '#1F6B33');
+        });
+        return;
+      }
+      block(48, (c, y) => text(c, when, M, y + 36, font(700, 28), INK), true);
+      wrap(x.r.cats.join(', '), font(700, 26), W - 2 * M).forEach((line) => block(36, (c, y) => text(c, line, M, y + 26, font(700, 26), '#0B6169'), true));
+      this.reportRows(x.r).forEach((row, i, all) => {
+        block(38, (c, y) => text(c, row.k, M, y + 30, font(700, 22), SOFT), true);
+        const lines = wrap(row.v, font(400, 26), W - 2 * M);
+        lines.forEach((line, n) => block(n === lines.length - 1 ? 44 : 34, (c, y) => text(c, line, M, y + 26, font(400, 26), INK), false));
+      });
+    });
+
+    // Lay the blocks out on letter-size pages; headings stay with what follows them.
+    const layout = [[]];
+    let y = M;
+    blocks.forEach((b, i) => {
+      let need = b.h;
+      for (let k = i; blocks[k] && blocks[k].keep && blocks[k + 1]; k++) need += blocks[k + 1].h;
+      if (y + need > BOTTOM && layout[layout.length - 1].length) { layout.push([]); y = M; }
+      layout[layout.length - 1].push({ b: b, y: y });
+      y += b.h;
+    });
+    const picture = document.createElement('canvas');
+    picture.width = W;
+    picture.height = M + blocks[0].h + blocks[1].h;
+    const pc = picture.getContext('2d');
+    pc.fillStyle = '#FFFFFF';
+    pc.fillRect(0, 0, W, picture.height);
+    blocks[0].draw(pc, M);
+    blocks[1].draw(pc, M + blocks[0].h);
+    const pages = layout.map((items, n) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const c = canvas.getContext('2d');
+      c.fillStyle = '#FFFFFF';
+      c.fillRect(0, 0, W, H);
+      items.forEach((it) => it.b.draw(c, it.y));
+      text(c, 'Self-reported log created with SomaSense. Not a medical record or diagnosis.', M, H - 56, font(400, 20), SOFT);
+      c.font = font(400, 20);
+      const page = 'Page ' + (n + 1) + ' of ' + layout.length;
+      text(c, page, W - M - c.measureText(page).width, H - 56, font(400, 20), SOFT);
+      return canvas.toDataURL('image/jpeg', 0.9);
+    });
+    return { pages: pages, calendar: picture.toDataURL('image/png') };
+  }
+  shareText(month, title) {
+    const list = this.shareEntries(month);
+    const lines = ['SomaSense symptom log: ' + title, this.shareSummary(list), 'The calendar picture and a PDF of this log are attached.', ''];
+    list.forEach((x) => {
+      if (!x.r) { lines.push(this.fmtDay(x.date) + ': No symptoms', ''); return; }
+      lines.push(this.fmtDay(x.date) + ' at ' + this.fmtTime(x.time), x.r.cats.join(', '));
+      this.reportRows(x.r).forEach((row) => lines.push(row.k + ': ' + row.v));
+      lines.push('');
+    });
+    const body = lines.join('\n');
+    return body.length > 20000 ? body.slice(0, 20000) + '\n\nThe full log continues in the attached PDF.' : body;
+  }
+  // A small PDF writer: each page is one picture, so any language or symbol in an entry prints correctly.
+  pdfBase64(pages) {
+    const enc = (t) => Uint8Array.from(t, (ch) => ch.charCodeAt(0) & 255);
+    const chunks = [];
+    let size = 0;
+    const put = (b) => { const u = typeof b === 'string' ? enc(b) : b; chunks.push(u); size += u.length; };
+    const offsets = [];
+    const obj = (n, body) => { offsets[n] = size; put(n + ' 0 obj\n' + body + '\nendobj\n'); };
+    put('%PDF-1.4\n');
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, '<< /Type /Pages /Count ' + pages.length + ' /Kids [' + pages.map((_, i) => (3 + i * 3) + ' 0 R').join(' ') + '] >>');
+    pages.forEach((url, i) => {
+      const n = 3 + i * 3;
+      const raw = atob(url.split(',')[1]);
+      obj(n, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 ' + (n + 1) + ' 0 R >> >> /Contents ' + (n + 2) + ' 0 R >>');
+      offsets[n + 1] = size;
+      put((n + 1) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width 1224 /Height 1584 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + raw.length + ' >>\nstream\n');
+      put(enc(raw));
+      put('\nendstream\nendobj\n');
+      const content = 'q 612 0 0 792 0 0 cm /Im0 Do Q';
+      obj(n + 2, '<< /Length ' + content.length + ' >>\nstream\n' + content + '\nendstream');
+    });
+    const count = 3 + pages.length * 3;
+    const xref = size;
+    let table = 'xref\n0 ' + count + '\n0000000000 65535 f \n';
+    for (let n = 1; n < count; n++) table += String(offsets[n]).padStart(10, '0') + ' 00000 n \n';
+    put(table + 'trailer\n<< /Size ' + count + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+    let out = '';
+    chunks.forEach((u) => {
+      for (let i = 0; i < u.length; i += 0x6000) out += String.fromCharCode.apply(null, u.subarray(i, i + 0x6000));
+    });
+    return btoa(out);
+  }
+  openShare() {
+    const month = this.state.calMonth;
+    const ready = document.fonts ? Promise.all([document.fonts.load('400 20px "Atkinson Hyperlegible"'), document.fonts.load('700 20px "Atkinson Hyperlegible"')]) : Promise.resolve();
+    ready.catch(() => {}).then(() => this.setState({ share: { month: month, ...this.sharePages(month) } }));
+  }
+  sendShare() {
+    const sh = this.state.share;
+    const parts = sh.month.split('-').map(Number);
+    const title = new Date(parts[0], parts[1] - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (!this.live) { this.flash('Sharing opens from the Android app. This preview shows what gets sent.'); return; }
+    const ok = window.AppShell.shareLog('SomaSense symptom log: ' + title, this.shareText(sh.month, title), 'SomaSense-' + sh.month, sh.calendar.split(',')[1], this.pdfBase64(sh.pages));
+    if (!ok) this.flash('The log could not be prepared for sharing.');
+  }
+  shareVals() {
+    const sh = this.state.share;
     return {
-      hasDetail: true,
-      detail: { cats: r.cats.join(', '), when: this.fmtDay(r.date) + ' at ' + this.fmtTime(r.time), rows: rows },
-      closeDetail: () => this.setState({ detailId: null })
+      hasShare: !!sh && this.state.tab === 'calendar' && !this.state.composing,
+      sharePreviewPages: sh ? sh.pages : [],
+      startShare: () => this.openShare(),
+      closeShare: () => this.setState({ share: null }),
+      sendShare: () => this.sendShare()
     };
   }
 
@@ -1565,7 +1932,8 @@ class Component extends DCLogic {
       ...this.calendarVals(),
       ...this.reportsVals(),
       ...this.settingsVals(),
-      ...this.detailVals()
+      ...this.detailVals(),
+      ...this.shareVals()
     };
   }
 }
