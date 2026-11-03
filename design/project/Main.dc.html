@@ -221,6 +221,7 @@ body{margin:0}
   </div>
   <div style="margin: 0 12px 16px; background: #FFFFFF; border: 1px solid #D3DCDC; border-radius: 16px; padding: 14px">
     <h2 style="margin: 0 0 8px; font-size: 18px">Your data</h2>
+    <button type="button" onClick="{{openPrivacy}}" style="width: 100%; min-height: 48px; margin-bottom: 16px; border-radius: 24px; border: 1px solid #0B6169; background: #FFFFFF; color: #0B6169; font: inherit; font-weight: 700; cursor: pointer">Privacy policy</button>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">This removes every report, symptom-free day and body shape setting from this phone. It can’t be undone. Anything you already shared isn’t affected.</p>
     <button type="button" onClick="{{wipeData}}" style="width: 100%; min-height: 48px; border-radius: 24px; border: 1px solid #B8430F; background: {{wipeBg}}; color: {{wipeFg}}; font: inherit; font-weight: 700; cursor: pointer">{{wipeLabel}}</button>
   </div>
@@ -470,6 +471,47 @@ body{margin:0}
 </div>
 </sc-if>
 
+<sc-if value="{{hasPrivacy}}" hint-placeholder-val="{{false}}">
+<div role="dialog" aria-label="Privacy policy" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 4; background: #FFFFFF; display: flex; flex-direction: column">
+  <div style="flex: none; display: flex; align-items: center; gap: 4px; padding: 6px 8px; border-bottom: 1px solid #D3DCDC">
+    <button type="button" aria-label="Close" onClick="{{closePrivacy}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+    </button>
+    <h2 style="margin: 0; font-size: 18px">Privacy policy</h2>
+  </div>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 16px 16px 24px">
+    <p style="margin: 0 0 12px; font-size: 14px; color: #4F6368">Effective November 3, 2026</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense is a free and open source calendar tool from ncubeeight LLC for logging symptoms and sensations felt across the body. This policy explains what happens to the information you enter in the Android app. In short, your log stays on your phone unless you choose to share it, and ncubeeight LLC never receives it.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">What the app stores on your phone</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense saves the following in its private storage on your phone:</p>
+    <ul style="margin: 0 0 12px; padding-left: 20px; font-size: 15px; line-height: 1.45"><li style="margin-bottom: 4px">Your reports: date, time, symptom or sensation types, body locations, severity, descriptions and notes, medicines, physical activity, other sensations and concerns</li><li style="margin-bottom: 4px">The days you mark as symptom-free</li><li style="margin-bottom: 4px">Your body shape setting</li></ul>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">This can include health information, so please keep it in mind when you decide who can use your phone.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">What ncubeeight LLC collects</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Nothing. The app has no accounts, advertising, analytics or crash reporting. It doesn’t have Android’s internet permission and requests no other permissions, so it can’t reach the internet or read your location, camera, microphone, contacts or files. ncubeeight LLC has no copy of your log and can’t see, recover or delete it for you.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">When you share your log</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">The Share button on the Calendar sends a month’s log only when you choose to. You pick the app and the recipient in Android’s share sheet. What you send includes a calendar picture, a PDF and a text list of that month’s entries.</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Once shared, the information is handled by the app and the people you sent it to, under their own privacy practices. Sending it by email or chat also means it travels over the internet through those services. SomaSense can’t recall anything you’ve already shared.</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">To prepare a share, the app keeps a temporary copy of the files on your phone until your next share or until you delete your data.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">Backups and new phones</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense opts out of Android’s cloud backup and device transfer, so your log isn’t copied to your Google account and won’t move to a new phone. To keep a copy, share your log before changing phones.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">Keeping and deleting your data</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Your data stays on your phone until you remove it. You can delete a single report from its detail screen, or select Delete stored on-device data in Settings to remove everything. Uninstalling the app also removes it. Deleted data can’t be restored.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">Security</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Your log is protected by Android’s separation between apps and by your phone’s lock screen. SomaSense doesn’t have its own passcode, so anyone who can use your unlocked phone can open it. Please use a screen lock.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">Other companies</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Companies that provide your phone and its software have their own privacy practices that SomaSense doesn’t control. These include Google Play if you install from there, Android, your phone’s maker and your keyboard app, which handles what you type.</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Links in the app open in your web browser. This website is hosted by GitHub and loads fonts from Google, so those companies may receive your IP address and browser details when you visit. ncubeeight LLC doesn’t add analytics to this website.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">Children</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense is not directed to children under 13, and ncubeeight LLC does not knowingly collect information from anyone, including children.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">Changes to this policy</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">If this policy changes, the updated version will be published here and in the app with a new effective date. Past versions are available in the project’s public history on GitHub.</p>
+    <h3 style="margin: 16px 0 6px; font-size: 16px">Contact</h3>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">For questions about this policy, open an issue at <a href="https://github.com/ncubeeight/SomaSense/issues" target="_blank" rel="noopener" style="color: #0B6169; font-weight: 700">the SomaSense GitHub repository</a>. Issues are public, so please don’t include health details or other personal information.</p>
+    <p style="margin: 16px 0 0; font-size: 15px; line-height: 1.45">This policy is also on the web at <a href="https://ncubeeight.github.io/SomaSense/privacy/" target="_blank" rel="noopener" style="color: #0B6169; font-weight: 700">ncubeeight.github.io/SomaSense/privacy</a>.</p>
+  </div>
+</div>
+</sc-if>
+
 <sc-if value="{{hasShare}}" hint-placeholder-val="{{false}}">
 <div role="dialog" aria-label="Share this month's log" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 4; background: #F3F6F6; display: flex; flex-direction: column">
   <div style="flex: none; display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: #FFFFFF; border-bottom: 1px solid #D3DCDC">
@@ -554,6 +596,7 @@ class Component extends DCLogic {
       reports: this.live ? saved.reports : this.seedReports(),
       deleteArmed: false,
       wipeArmed: false,
+      privacy: false,
       share: null,
       homeDay: this.TODAY,
       calMonth: this.TODAY.slice(0, 7),
@@ -1038,6 +1081,7 @@ class Component extends DCLogic {
   }
   handleBack() {
     const s = this.state;
+    if (s.privacy) { this.setState({ privacy: false }); return true; }
     if (s.share) { this.setState({ share: null }); return true; }
     if (s.detailId) { this.setState({ detailId: null, deleteArmed: false }); return true; }
     if (s.composing) { this.setState({ composing: false }); return true; }
@@ -1342,7 +1386,10 @@ class Component extends DCLogic {
       wipeLabel: s.wipeArmed ? 'Tap again to delete everything' : 'Delete stored on-device data',
       wipeBg: s.wipeArmed ? '#B8430F' : '#FFFFFF',
       wipeFg: s.wipeArmed ? '#FFFFFF' : '#B8430F',
-      wipeData: () => this.wipeData()
+      wipeData: () => this.wipeData(),
+      hasPrivacy: s.privacy && on,
+      openPrivacy: () => this.setState({ privacy: true }),
+      closePrivacy: () => this.setState({ privacy: false })
     };
   }
   wipeData() {

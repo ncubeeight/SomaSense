@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- No INTERNET permission and no cloud backup: the log stays on the device unless the person shares it. -->
+<!-- No INTERNET permission, backup, device transfer or WebView diagnostics: the log stays on the device unless the person shares it. docs/privacy.md relies on this. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

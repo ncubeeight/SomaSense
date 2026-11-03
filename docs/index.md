@@ -12,6 +12,10 @@ Use SomaSense to track feelings you have across the body over time and to monito
 
 To customize body shape model to your body type, you may make modifications in the Settings tab of the app.
 
+## Privacy
+
+Your log stays on your phone unless you choose to share it. Read the [SomaSense Privacy Policy]({{ '/privacy/' | relative_url }}).
+
 ## About
 
 SomaSense was authored by ncubeeight LLC for distribution on Github, Apple App Store and Android Play Store. Visit ncubeeight at [ncubeeight.com](https://ncubeeight.com)
