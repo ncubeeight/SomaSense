@@ -1,0 +1,17 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-03T12:00:00Z" },
+  "title": "Symptom Tracker UI Draft",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 Clickable prototype (start here)", "is_interactive": true },
+    "PointsSelected.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 Body map with points selected", "is_interactive": true },
+    "ReportForm.dc.html": { "x": 940, "y": 0, "w": 390, "h": 1740, "title": "3 New report (full scroll length)", "is_interactive": true },
+    "CalendarLog.dc.html": { "x": 1410, "y": 0, "w": 390, "h": 1030, "title": "4 Calendar log (full scroll length)", "is_interactive": true },
+    "FrequencyReport.dc.html": { "x": 1880, "y": 0, "w": 390, "h": 1560, "title": "5 Frequency report (full scroll length)", "is_interactive": true }
+  },
+  "order": ["Main.dc.html", "PointsSelected.dc.html", "ReportForm.dc.html", "CalendarLog.dc.html", "FrequencyReport.dc.html"],
+  "notes": {},
+  "designSystems": []
+}

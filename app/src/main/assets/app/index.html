@@ -1,0 +1,1576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, user-scalable=no">
+<title>SomaSense</title>
+<style>
+@font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 400; src: url(atkinson-400.woff2) format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 700; src: url(atkinson-700.woff2) format('woff2'); }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #121622; -webkit-tap-highlight-color: transparent; }
+body { -webkit-user-select: none; user-select: none; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<template id="dc-template">
+
+<div style="width: 390px; height: {{phoneH}}px; position: relative; overflow: hidden; background: #F3F6F6; color: #14282C; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 16px; line-height: 1.35">
+
+<sc-if value="{{isHome}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: {{homeBottom}}; display: flex; flex-direction: column">
+  <div style="height: 56px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+    <button type="button" aria-label="Previous day" onClick="{{dayPrev}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </button>
+    <div style="text-align: center">
+      <div style="font-size: 20px; font-weight: 700">{{homeTitle}}</div>
+      <div style="font-size: 13px; color: #4F6368">{{homeSub}}</div>
+    </div>
+    <button type="button" aria-label="Next day" disabled="{{isToday}}" onClick="{{dayNext}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: {{nextColor}}; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+    </button>
+  </div>
+
+  <div style="flex: none; display: flex; justify-content: center; padding-bottom: 4px">
+    <div style="display: flex; background: #FFFFFF; border: 1px solid #C4D0D0; border-radius: 22px; padding: 1px; gap: 2px">
+      <sc-for list="{{viewChips}}" as="v" hint-placeholder-count="4">
+        <button type="button" aria-pressed="{{v.on}}" onClick="{{v.pick}}" style="min-width: 76px; height: 42px; border: 0; border-radius: 21px; background: {{v.bg}}; color: {{v.fg}}; font: inherit; font-weight: 700; cursor: pointer">{{v.label}}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div data-stage style="flex: 1; min-height: 0; position: relative; display: flex; justify-content: center; align-items: flex-start; overflow: hidden">
+    <button type="button" aria-label="{{stageAria}}" onPointerDown="{{stageDown}}" onPointerMove="{{stageMove}}" onPointerUp="{{stageUp}}" onPointerCancel="{{stageCancel}}" onKeyDown="{{stageKey}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background: transparent; cursor: grab; touch-action: none"></button>
+    <canvas aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: {{glDisplay}}; pointer-events: none"></canvas>
+    <div data-fig style="position: relative; width: {{figW}}px; height: {{figH}}px; flex: none; transform: {{figTransform}}; pointer-events: none">
+      <sc-for list="{{bodyFrames}}" as="f" hint-placeholder-count="1">
+        <img src="{{f.url}}" alt="" draggable="false" onLoad="{{figLoad}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: {{f.opacity}}; transform: {{bodyFlip}}; pointer-events: none">
+      </sc-for>
+      <sc-for list="{{pinButtons}}" as="p" hint-placeholder-count="0">
+        <button type="button" aria-label="{{p.aria}}" disabled="{{p.hidden}}" onClick="{{p.remove}}" style="position: absolute; left: {{p.l}}; top: {{p.t}}; width: {{p.size}}; height: {{p.size}}; transform: translate(-50%, -50%) scale({{markScale}}); border-radius: 50%; border: 2px solid #FFFFFF; background: #B8430F; color: #FFFFFF; font: inherit; font-size: {{p.font}}; font-weight: 700; padding: 0; opacity: {{p.opacity}}; pointer-events: {{p.events}}; cursor: pointer">{{p.n}}</button>
+      </sc-for>
+    </div>
+    <sc-if value="{{showSideLabels}}" hint-placeholder-val="{{true}}">
+      <div style="position: absolute; left: 14px; top: 12px; font-size: 13px; font-weight: 700; color: #4F6368; pointer-events: none">{{screenLeftSide}}</div>
+      <div style="position: absolute; right: 14px; top: 12px; font-size: 13px; font-weight: 700; color: #4F6368; pointer-events: none">{{screenRightSide}}</div>
+    </sc-if>
+    <sc-if value="{{isZoomed}}" hint-placeholder-val="{{false}}">
+      <div style="position: absolute; left: 12px; bottom: 12px; display: flex; gap: 8px">
+        <button type="button" aria-label="Turn body left" onClick="{{turnLeft}}" style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid #C4D0D0; background: #FFFFFF; color: #14282C; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8v5h5"></path><path d="M4.6 13a8 8 0 1 0 1.9-6.6L4 8.8"></path></svg>
+        </button>
+        <button type="button" aria-label="Turn body right" onClick="{{turnRight}}" style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid #C4D0D0; background: #FFFFFF; color: #14282C; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 8v5h-5"></path><path d="M19.4 13a8 8 0 1 1-1.9-6.6L20 8.8"></path></svg>
+        </button>
+      </div>
+    </sc-if>
+    <div style="position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 8px">
+      <button type="button" aria-label="Zoom in" disabled="{{zoomInOff}}" onClick="{{zoomIn}}" style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid #C4D0D0; background: #FFFFFF; color: {{zoomInColor}}; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+      </button>
+      <button type="button" aria-label="Zoom out" disabled="{{zoomOutOff}}" onClick="{{zoomOut}}" style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid #C4D0D0; background: #FFFFFF; color: {{zoomOutColor}}; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <sc-if value="{{noneSelected}}" hint-placeholder-val="{{true}}">
+    <div style="flex: none; min-height: 76px; box-sizing: border-box; background: #FFFFFF; border-top: 1px solid #D3DCDC; padding: 10px 16px; display: flex; flex-direction: column; justify-content: center">
+      <div style="font-weight: 700">{{mapHint}}</div>
+      <div style="font-size: 13px; color: #4F6368">{{mapHintSub}}</div>
+    </div>
+  </sc-if>
+  <sc-if value="{{someSelected}}" hint-placeholder-val="{{false}}">
+    <div role="region" aria-label="Add details for marked points" style="flex: none; height: 156px; box-sizing: border-box; position: relative; z-index: 2; background: #FFFFFF; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 20px rgba(20, 40, 44, 0.16); padding: 14px 16px 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px">
+      <div style="display: flex; align-items: flex-start; gap: 8px">
+        <div role="status" style="flex: 1; min-width: 0">
+          <div style="font-size: 18px; font-weight: 700">What are you feeling here?</div>
+          <div style="font-size: 14px; color: #4F6368; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{selectedSummary}}</div>
+        </div>
+        <button type="button" onClick="{{clearPins}}" style="flex: none; height: 44px; padding: 0 8px; margin: -6px -8px 0 0; border: 0; background: transparent; color: #0B6169; font: inherit; font-weight: 700; cursor: pointer">Clear</button>
+      </div>
+      <button type="button" onClick="{{startCompose}}" style="flex: none; width: 100%; height: 52px; border: 0; border-radius: 26px; background: #0B6169; color: #FFFFFF; font: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px">
+        Add symptom details
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+      </button>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{isCalendar}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 80px; overflow-y: auto">
+  <div style="padding: 16px 16px 8px">
+    <h1 style="margin: 0; font-size: 24px">Calendar</h1>
+    <div style="font-size: 14px; color: #4F6368">Where and when symptoms were reported</div>
+  </div>
+  <div style="display: flex; gap: 8px; padding: 4px 16px 8px; overflow-x: auto">
+    <sc-for list="{{areaChips}}" as="c" hint-placeholder-count="5">
+      <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="flex: none; height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+    </sc-for>
+  </div>
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+    <button type="button" aria-label="Previous month" onClick="{{monthPrev}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </button>
+    <div style="font-size: 18px; font-weight: 700">{{monthTitle}}</div>
+    <button type="button" aria-label="Next month" onClick="{{monthNext}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+    </button>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; padding: 0 12px">
+    <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7">
+      <div style="text-align: center; font-size: 13px; font-weight: 700; color: #4F6368; padding-bottom: 4px">{{w}}</div>
+    </sc-for>
+    <sc-for list="{{calCells}}" as="d" hint-placeholder-count="35">
+      <button type="button" disabled="{{d.blank}}" aria-label="{{d.aria}}" aria-pressed="{{d.selected}}" onClick="{{d.pick}}" style="height: 48px; border-radius: 10px; border: {{d.border}}; background: {{d.bg}}; color: {{d.fg}}; font: inherit; font-weight: {{d.weight}}; padding: 0; cursor: {{d.cursor}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-sizing: border-box">
+        <span>{{d.label}}</span>
+        <span style="font-size: 11px; line-height: 1">{{d.count}}</span>
+      </button>
+    </sc-for>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; font-size: 13px; color: #4F6368; flex-wrap: wrap">
+    <span>Highest severity</span>
+    <span style="display: flex; align-items: center; gap: 4px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #D6ECEC; display: block"></span>Mild</span>
+    <span style="display: flex; align-items: center; gap: 4px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #86C6C4; display: block"></span>Moderate</span>
+    <span style="display: flex; align-items: center; gap: 4px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #0B6169; display: block"></span>Severe</span>
+    <span style="display: flex; align-items: center; gap: 4px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #8EDB8F; color: #14282C; font-size: 11px; line-height: 14px; text-align: center; display: block" aria-hidden="true">✓</span>No symptoms</span>
+  </div>
+
+  <div style="margin: 4px 12px 16px; background: #FFFFFF; border: 1px solid #D3DCDC; border-radius: 16px; padding: 14px">
+    <h2 style="margin: 0; font-size: 18px">{{calDayTitle}}</h2>
+    <div style="font-size: 14px; color: #4F6368; margin-top: 2px">{{calDaySub}}</div>
+    <sc-if value="{{calCanMarkFree}}" hint-placeholder-val="{{false}}">
+      <button type="button" aria-pressed="{{calDayFree}}" onClick="{{toggleFree}}" style="width: 100%; height: 48px; margin-top: 10px; border-radius: 24px; border: 2px solid #2F8F46; background: {{freeBg}}; color: #14282C; font: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>
+        No symptoms
+      </button>
+    </sc-if>
+    <sc-if value="{{calDayHas}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; gap: 16px; justify-content: center; margin: 12px 0 8px">
+        <div style="text-align: center">
+          <div style="position: relative; width: 86px; height: 158px">
+            <img src="{{thumbFront}}" alt="" width="86" height="158" style="position: absolute; left: 0; top: 0">
+            <sc-for list="{{calFrontDots}}" as="m" hint-placeholder-count="0">
+              <span style="position: absolute; left: {{m.l}}; top: {{m.t}}; width: 10px; height: 10px; transform: translate(-50%, -50%); border-radius: 50%; background: #0B6169; border: 1px solid #FFFFFF; box-sizing: border-box; display: block"></span>
+            </sc-for>
+          </div>
+          <div style="font-size: 13px; color: #4F6368; margin-top: 4px">Front</div>
+        </div>
+        <div style="text-align: center">
+          <div style="position: relative; width: 86px; height: 158px">
+            <img src="{{thumbBack}}" alt="" width="86" height="158" style="position: absolute; left: 0; top: 0">
+            <sc-for list="{{calBackDots}}" as="m" hint-placeholder-count="0">
+              <span style="position: absolute; left: {{m.l}}; top: {{m.t}}; width: 10px; height: 10px; transform: translate(-50%, -50%); border-radius: 50%; background: #0B6169; border: 1px solid #FFFFFF; box-sizing: border-box; display: block"></span>
+            </sc-for>
+          </div>
+          <div style="font-size: 13px; color: #4F6368; margin-top: 4px">Back</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{calDayReports}}" as="r" hint-placeholder-count="2">
+          <button type="button" onClick="{{r.open}}" style="text-align: left; min-height: 64px; padding: 10px 12px; border: 1px solid #D3DCDC; border-radius: 12px; background: #F3F6F6; color: #14282C; font: inherit; cursor: pointer">
+            <span style="display: flex; justify-content: space-between; gap: 8px; font-weight: 700"><span>{{r.time}} · {{r.cats}}</span><span style="flex: none">{{r.sev}}</span></span>
+            <span style="display: block; font-size: 14px; color: #4F6368; margin-top: 2px">{{r.where}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{isSettings}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 80px; overflow-y: auto">
+  <div style="padding: 16px 16px 8px">
+    <h1 style="margin: 0; font-size: 24px">Settings</h1>
+  </div>
+  <div style="margin: 4px 12px 16px; background: #FFFFFF; border: 1px solid #D3DCDC; border-radius: 16px; padding: 14px">
+    <h2 style="margin: 0 0 8px; font-size: 18px">About</h2>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense is a free and open source calendar tool for logging symptoms and sensations that are felt across the body. All data entered into the application is stored locally without being transmitted to the developer or the hardware provider. You may share your own calendar log to email or other tools you have on device by selecting the Share option available in your calendar.</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Use SomaSense to track the progression of feelings you have over time and track their progression or transience. When used for tracking pain or other unexpected physical stimuli the tool can be used to create a log of a symptom’s progression or by a medical provider for measuring time to heal.</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">To customize body shape model to your body type, you may make modifications here:</p>
+    <sc-if value="{{bodyOptionsOn}}" hint-placeholder-val="{{true}}">
+      <div style="position: relative; height: 270px; background: #F3F6F6; border-radius: 12px; overflow: hidden">
+        <img src="{{previewProbe}}" alt="" onLoad="{{previewLoad}}" style="display: none">
+        <canvas role="img" aria-label="Preview of the body shape, from the front and the side" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%"></canvas>
+      </div>
+      <label style="display: block; margin-top: 14px; font-weight: 700">Gender
+        <input type="range" min="-100" max="100" step="1" value="{{bodyG}}" aria-valuetext="{{bodyGText}}" onChange="{{setBodyG}}" style="display: block; width: 100%; height: 44px; margin: 0; accent-color: #0B6169">
+      </label>
+      <div style="display: flex; justify-content: space-between; font-size: 13px; color: #4F6368; margin-top: -6px"><span>Feminine</span><span>Androgynous</span><span>Masculine</span></div>
+      <label style="display: block; margin-top: 14px; font-weight: 700">Build
+        <input type="range" min="-100" max="100" step="1" value="{{bodyB}}" aria-valuetext="{{bodyBText}}" onChange="{{setBodyB}}" style="display: block; width: 100%; height: 44px; margin: 0; accent-color: #0B6169">
+      </label>
+      <div style="display: flex; justify-content: space-between; font-size: 13px; color: #4F6368; margin-top: -6px"><span>Slimmer</span><span>Average</span><span>Fuller</span></div>
+      <button type="button" disabled="{{bodyIsDefault}}" onClick="{{resetBody}}" style="width: 100%; height: 48px; margin: 14px 0 16px; border-radius: 24px; border: 1px solid {{bodyResetColor}}; background: #FFFFFF; color: {{bodyResetColor}}; font: inherit; font-weight: 700; cursor: pointer">Reset to default</button>
+    </sc-if>
+    <sc-if value="{{bodyOptionsOff}}" hint-placeholder-val="{{false}}">
+      <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Body shape options aren’t available on this device.</p>
+    </sc-if>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense was authored by ncubeeight LLC for distribution on Github, Apple App Store and Android Play Store. Visit ncubeeight at <a href="https://ncubeeight.com" target="_blank" rel="noopener" style="color: #0B6169; font-weight: 700; overflow-wrap: anywhere">ncubeeight.com</a></p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">If code is forked please attribute ncubeeight.github.com</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense was coded in ClaudeCode with supplemental support by Apple Xcode and Google Play Console, with additional support by Google Gemini for marketing collateral design.</p>
+    <p style="margin: 0; font-size: 15px; line-height: 1.45">The body models used in SomaSense are provided by MakeHuman under open source license available to review here: <a href="https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md" target="_blank" rel="noopener" style="color: #0B6169; font-weight: 700; overflow-wrap: anywhere">https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md</a></p>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{isReports}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 80px; overflow-y: auto">
+  <div style="padding: 16px 16px 8px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">Reports</h1>
+      <div style="font-size: 14px; color: #4F6368">Frequency by symptom or sensation</div>
+    </div>
+    <button type="button" onClick="{{exportPdf}}" style="flex: none; height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid #0B6169; background: #FFFFFF; color: #0B6169; font: inherit; font-weight: 700; cursor: pointer">Share PDF</button>
+  </div>
+  <div style="display: flex; gap: 8px; padding: 4px 16px 12px">
+    <sc-for list="{{rangeChips}}" as="c" hint-placeholder-count="3">
+      <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="flex: 1; height: 44px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+    </sc-for>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 16px 12px">
+    <sc-for list="{{statTiles}}" as="t" hint-placeholder-count="3">
+      <div style="background: #FFFFFF; border: 1px solid #D3DCDC; border-radius: 12px; padding: 10px 12px">
+        <div style="font-size: 26px; font-weight: 700; line-height: 1.15">{{t.value}}</div>
+        <div style="font-size: 13px; color: #4F6368">{{t.label}}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin: 0 16px 12px; background: #FFFFFF; border: 1px solid #D3DCDC; border-radius: 16px; padding: 14px 14px 8px">
+    <h2 style="margin: 0; font-size: 18px">How often, by type</h2>
+    <div style="font-size: 13px; color: #4F6368; margin-bottom: 6px">A report with two types counts once in each. Tap a type for details.</div>
+    <sc-for list="{{catRows}}" as="c" hint-placeholder-count="6">
+      <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="display: block; width: 100%; text-align: left; min-height: 52px; padding: 7px 8px; margin: 0 0 2px; border: 0; border-radius: 10px; background: {{c.rowBg}}; color: #14282C; font: inherit; cursor: pointer; box-sizing: border-box">
+        <span style="display: flex; justify-content: space-between; gap: 8px; font-size: 15px"><span style="font-weight: 700">{{c.label}}</span><span>{{c.count}} · avg severity {{c.avg}}</span></span>
+        <span style="display: block; height: 8px; margin-top: 6px; background: #E4EAEA; border-radius: 4px; overflow: hidden"><span style="display: block; height: 8px; width: {{c.pct}}; background: {{c.barColor}}; border-radius: 4px"></span></span>
+      </button>
+    </sc-for>
+    <sc-if value="{{noCats}}" hint-placeholder-val="{{false}}">
+      <div style="padding: 12px 0; color: #4F6368">No reports in this period.</div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{hasDrill}}" hint-placeholder-val="{{true}}">
+    <div style="margin: 0 16px 12px; background: #FFFFFF; border: 1px solid #D3DCDC; border-radius: 16px; padding: 14px">
+      <h2 style="margin: 0; font-size: 18px">{{drillTitle}}</h2>
+      <div style="font-size: 13px; color: #4F6368">{{drillSub}}</div>
+
+      <h3 style="margin: 16px 0 8px; font-size: 15px">Over time</h3>
+      <div role="img" aria-label="{{trendAria}}" style="display: flex; align-items: flex-end; gap: 3px; height: 84px; border-bottom: 1px solid #C4D0D0">
+        <sc-for list="{{trendBars}}" as="b" hint-placeholder-count="5">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px">
+            <div style="font-size: 12px; color: #4F6368">{{b.n}}</div>
+            <div title="{{b.tip}}" style="width: 100%; max-width: 24px; height: {{b.h}}; background: #0B6169; border-radius: 4px 4px 0 0"></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4F6368; margin-top: 4px"><span>{{trendStart}}</span><span>{{trendEnd}}</span></div>
+
+      <h3 style="margin: 16px 0 6px; font-size: 15px">Where on the body</h3>
+      <sc-for list="{{whereRows}}" as="w" hint-placeholder-count="4">
+        <div style="margin-bottom: 8px">
+          <div style="display: flex; justify-content: space-between; font-size: 14px"><span>{{w.label}}</span><span>{{w.count}}</span></div>
+          <div style="height: 6px; margin-top: 3px; background: #E4EAEA; border-radius: 3px; overflow: hidden"><div style="height: 6px; width: {{w.pct}}; background: #0B6169; border-radius: 3px"></div></div>
+        </div>
+      </sc-for>
+
+      <h3 style="margin: 16px 0 6px; font-size: 15px">Time of day</h3>
+      <sc-for list="{{whenRows}}" as="w" hint-placeholder-count="4">
+        <div style="margin-bottom: 8px">
+          <div style="display: flex; justify-content: space-between; font-size: 14px"><span>{{w.label}}</span><span>{{w.count}}</span></div>
+          <div style="height: 6px; margin-top: 3px; background: #E4EAEA; border-radius: 3px; overflow: hidden"><div style="height: 6px; width: {{w.pct}}; background: #0B6169; border-radius: 3px"></div></div>
+        </div>
+      </sc-for>
+
+      <h3 style="margin: 16px 0 6px; font-size: 15px">Logged alongside</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px">
+        <sc-for list="{{contextTags}}" as="t" hint-placeholder-count="4">
+          <span style="padding: 5px 10px; border-radius: 8px; background: #F3F6F6; border: 1px solid #D3DCDC; font-size: 14px">{{t}}</span>
+        </sc-for>
+      </div>
+      <sc-if value="{{noContext}}" hint-placeholder-val="{{false}}">
+        <div style="font-size: 14px; color: #4F6368">No medicines, activities or other sensations logged.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+  <div style="padding: 0 20px 20px; font-size: 13px; color: #4F6368">Sample data. This log is a record to share with your clinician. It does not diagnose or give medical advice.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showNav}}" hint-placeholder-val="{{true}}">
+<nav aria-label="Main" style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: #FFFFFF; border-top: 1px solid #D3DCDC; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+  <button type="button" aria-current="{{navHome.current}}" onClick="{{navHome.pick}}" style="border: 0; background: transparent; color: #14282C; font: inherit; font-size: 13px; font-weight: {{navHome.weight}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer">
+    <span style="width: 60px; height: 32px; border-radius: 16px; background: {{navHome.pill}}; display: flex; align-items: center; justify-content: center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.5" r="2.5"></circle><path d="M5 10c4 1.5 10 1.5 14 0"></path><path d="M12 11v5"></path><path d="M12 16l-3 6"></path><path d="M12 16l3 6"></path></svg>
+    </span>
+    Body map
+  </button>
+  <button type="button" aria-current="{{navCal.current}}" onClick="{{navCal.pick}}" style="border: 0; background: transparent; color: #14282C; font: inherit; font-size: 13px; font-weight: {{navCal.weight}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer">
+    <span style="width: 60px; height: 32px; border-radius: 16px; background: {{navCal.pill}}; display: flex; align-items: center; justify-content: center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2.5"></rect><path d="M3.5 10h17"></path><path d="M8 3v4"></path><path d="M16 3v4"></path></svg>
+    </span>
+    Calendar
+  </button>
+  <button type="button" aria-current="{{navRep.current}}" onClick="{{navRep.pick}}" style="border: 0; background: transparent; color: #14282C; font: inherit; font-size: 13px; font-weight: {{navRep.weight}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer">
+    <span style="width: 60px; height: 32px; border-radius: 16px; background: {{navRep.pill}}; display: flex; align-items: center; justify-content: center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"></path><path d="M7 20v-6"></path><path d="M12 20V6"></path><path d="M17 20v-10"></path></svg>
+    </span>
+    Reports
+  </button>
+  <button type="button" aria-current="{{navSet.current}}" onClick="{{navSet.pick}}" style="border: 0; background: transparent; color: #14282C; font: inherit; font-size: 13px; font-weight: {{navSet.weight}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer">
+    <span style="width: 60px; height: 32px; border-radius: 16px; background: {{navSet.pill}}; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10"></path><path d="M18 7h2"></path><circle cx="16" cy="7" r="2"></circle><path d="M4 17h2"></path><path d="M10 17h10"></path><circle cx="8" cy="17" r="2"></circle></svg>
+    </span>
+    Settings
+  </button>
+</nav>
+</sc-if>
+
+<sc-if value="{{composing}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #F3F6F6; display: flex; flex-direction: column">
+  <div style="flex: none; height: 60px; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: #FFFFFF; border-bottom: 1px solid #D3DCDC">
+    <button type="button" aria-label="Back to body map" onClick="{{backToMap}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+    </button>
+    <h1 style="margin: 0; font-size: 20px">New report</h1>
+  </div>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px">
+
+    <section>
+      <h2 style="margin: 0 0 8px; font-size: 16px">Where</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{formPoints}}" as="p" hint-placeholder-count="2">
+          <span style="display: inline-flex; align-items: center; gap: 6px; height: 44px; padding-left: 6px; border-radius: 22px; background: #FFFFFF; border: 1px solid #C4D0D0; font-size: 15px">
+            <span style="width: 26px; height: 26px; border-radius: 50%; background: #B8430F; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{p.n}}</span>
+            {{p.label}}
+            <button type="button" aria-label="{{p.aria}}" onClick="{{p.remove}}" style="width: 36px; height: 42px; border: 0; background: transparent; color: #4F6368; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+            </button>
+          </span>
+        </sc-for>
+        <button type="button" onClick="{{backToMap}}" style="height: 44px; padding: 0 16px; border-radius: 22px; border: 1px dashed #0B6169; background: transparent; color: #0B6169; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Add point</button>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="margin: 0 0 8px; font-size: 16px">When</h2>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div style="flex: 1; font-size: 15px">{{formDate}}</div>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 15px">
+          <span style="color: #4F6368">{{partOfDay}}</span>
+          <input type="time" aria-label="Time of day" value="{{form.time}}" onChange="{{setTime}}" style="height: 44px; box-sizing: border-box; padding: 0 10px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="margin: 0 0 8px; font-size: 16px">Symptom or sensation type</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{catChips}}" as="c" hint-placeholder-count="8">
+          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section>
+      <label for="desc" style="display: block; font-size: 16px; font-weight: 700; margin-bottom: 8px">Description</label>
+      <textarea id="desc" rows="3" value="{{form.desc}}" onChange="{{setDesc}}" placeholder="What does it feel or look like?" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit; resize: vertical"></textarea>
+    </section>
+
+    <section>
+      <h2 style="margin: 0 0 4px; font-size: 16px">Severity</h2>
+      <div style="display: flex; align-items: baseline; gap: 8px">
+        <span style="font-size: 32px; font-weight: 700; line-height: 1.1">{{form.severity}}</span>
+        <span style="color: #4F6368">out of 10 · {{severityWord}}</span>
+      </div>
+      <input type="range" min="0" max="10" step="1" aria-label="Severity from 0 to 10" value="{{form.severity}}" onChange="{{setSeverity}}" style="width: 100%; height: 44px; margin: 0; accent-color: #0B6169">
+      <div style="display: flex; justify-content: space-between; font-size: 13px; color: #4F6368; margin-bottom: 10px"><span>None</span><span>Worst imaginable</span></div>
+      <label for="sevnote" style="display: block; font-size: 14px; color: #4F6368; margin-bottom: 4px">Severity notes</label>
+      <textarea id="sevnote" rows="2" value="{{form.sevNote}}" onChange="{{setSevNote}}" placeholder="Constant or in waves? Does it stop you doing anything?" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit; resize: vertical"></textarea>
+    </section>
+
+    <section>
+      <h2 style="margin: 0 0 8px; font-size: 16px">Medicines taken</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px">
+        <sc-for list="{{medChips}}" as="c" hint-placeholder-count="4">
+          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+        </sc-for>
+      </div>
+      <input type="text" aria-label="Other medicine or dose" value="{{form.medOther}}" onChange="{{setMedOther}}" placeholder="Other medicine or dose" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+    </section>
+
+    <section>
+      <h2 style="margin: 0 0 8px; font-size: 16px">Physical activity at the time</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px">
+        <sc-for list="{{actChips}}" as="c" hint-placeholder-count="6">
+          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+        </sc-for>
+      </div>
+      <input type="text" aria-label="Other activity" value="{{form.actOther}}" onChange="{{setActOther}}" placeholder="Other activity" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+    </section>
+
+    <section>
+      <h2 style="margin: 0 0 8px; font-size: 16px">Other sensations</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px">
+        <sc-for list="{{senseChips}}" as="c" hint-placeholder-count="6">
+          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+        </sc-for>
+      </div>
+      <input type="text" aria-label="Other sensation" value="{{form.senseOther}}" onChange="{{setSenseOther}}" placeholder="Something else you noticed" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+    </section>
+
+    <section>
+      <label for="concern" style="display: block; font-size: 16px; font-weight: 700; margin-bottom: 8px">Concerns</label>
+      <textarea id="concern" rows="2" value="{{form.concern}}" onChange="{{setConcern}}" placeholder="Anything you want to raise with your clinician" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit; resize: vertical"></textarea>
+    </section>
+  </div>
+  <div style="flex: none; padding: 10px 16px 14px; background: #FFFFFF; border-top: 1px solid #D3DCDC">
+    <sc-if value="{{saveHintShow}}" hint-placeholder-val="{{false}}">
+      <div style="font-size: 13px; color: #4F6368; margin-bottom: 6px">{{saveHint}}</div>
+    </sc-if>
+    <button type="button" disabled="{{saveDisabled}}" onClick="{{save}}" style="width: 100%; height: 52px; border: 0; border-radius: 26px; background: {{saveBg}}; color: {{saveFg}}; font: inherit; font-weight: 700; cursor: {{saveCursor}}">Save report</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasDetail}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(20, 40, 44, 0.5); display: flex; flex-direction: column; justify-content: flex-end">
+  <div role="dialog" aria-label="Report details" style="background: #FFFFFF; border-radius: 20px 20px 0 0; max-height: 80%; overflow-y: auto; padding: 16px">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px">
+      <div>
+        <h2 style="margin: 0; font-size: 20px">{{detail.cats}}</h2>
+        <div style="font-size: 14px; color: #4F6368">{{detail.when}}</div>
+      </div>
+      <button type="button" aria-label="Close report details" onClick="{{closeDetail}}" style="flex: none; width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <sc-for list="{{detail.rows}}" as="d" hint-placeholder-count="4">
+      <div style="padding: 10px 0; border-top: 1px solid #E4EAEA">
+        <div style="font-size: 13px; font-weight: 700; color: #4F6368">{{d.k}}</div>
+        <div style="font-size: 15px">{{d.v}}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{showSplash}}" hint-placeholder-val="{{false}}">
+<div role="img" aria-label="SomaSense. Trace. Track. Heal." onClick="{{skipSplash}}" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; background: #121622; opacity: {{splashOpacity}}; transition: opacity {{splashFadeMs}}ms ease-in-out; overflow: hidden; display: flex; align-items: center; justify-content: center">
+  <img src="{{splashUrl}}" alt="" draggable="false" onLoad="{{splashLoaded}}" onError="{{skipSplash}}" style="flex: none; width: 850px; height: auto; opacity: {{splashImgOpacity}}; transition: opacity {{splashInMs}}ms ease-out; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent)">
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div role="status" style="position: absolute; left: 16px; right: 16px; bottom: 92px; padding: 12px 16px; border-radius: 10px; background: #14282C; color: #FFFFFF; font-size: 15px">{{toast}}</div>
+</sc-if>
+
+</div>
+</template>
+<script src="preact.umd.js"></script>
+<script src="runtime.js"></script>
+<script>
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.TODAY = '2026-10-27';
+    this.CATS = ['Pain', 'Tingling / numbness', 'Rash / skin', 'Itching', 'Burning', 'Swelling', 'Stiffness', 'Other'];
+    this.MEDS = ['Ibuprofen', 'Gabapentin', 'Antihistamine', 'Topical cream'];
+    this.ACTS = ['Resting', 'Sleeping', 'Walking', 'Exercise', 'Desk work', 'Driving', 'Housework'];
+    this.SENSES = ['Fatigue', 'Headache', 'Dizziness', 'Nausea', 'Fever', 'Poor sleep'];
+    this.AREAS = [['all', 'All areas'], ['head', 'Head & neck'], ['arms', 'Arms & hands'], ['torso', 'Torso & hips'], ['legs', 'Legs & feet']];
+    this.BODY = this.bodyModel();
+    this.seen = new Map();
+    this.FEET_GAP = 32;
+    this.MAX_ZOOM = 6;
+    this.SHAPES_URL = 'body-shapes.json';
+    this.shapeVer = 0;
+    this.SPLASH_URL = 'somasense-splash.jpg';
+    this.SPLASH_IN = 600;
+    this.SPLASH_HOLD = 1600;
+    this.SPLASH_FADE = 1000;
+    this.FRAMES = ["frames/body-000.png", "frames/body-005.png", "frames/body-010.png", "frames/body-015.png", "frames/body-020.png", "frames/body-025.png", "frames/body-030.png", "frames/body-035.png", "frames/body-040.png", "frames/body-045.png", "frames/body-050.png", "frames/body-055.png", "frames/body-060.png", "frames/body-065.png", "frames/body-070.png", "frames/body-075.png", "frames/body-080.png", "frames/body-085.png", "frames/body-090.png", "frames/body-095.png", "frames/body-100.png", "frames/body-105.png", "frames/body-110.png", "frames/body-115.png", "frames/body-120.png", "frames/body-125.png", "frames/body-130.png", "frames/body-135.png", "frames/body-140.png", "frames/body-145.png", "frames/body-150.png", "frames/body-155.png", "frames/body-160.png", "frames/body-165.png", "frames/body-170.png", "frames/body-175.png", "frames/body-180.png"];
+    const start = props.startScreen || 'home';
+    const form = this.blankForm();
+    let selected = [];
+    if (start === 'selected' || start === 'report') {
+      selected = [this.zonePoint('f-forearm-L'), this.zonePoint('f-hand-L'), this.zonePoint('f-knee-R')];
+    }
+    if (start === 'report') {
+      form.cats = ['Tingling / numbness', 'Burning'];
+      form.desc = 'Pins and needles in the forearm and hand, with a burning patch on the knee.';
+      form.severity = 6;
+      form.sevNote = 'Comes in waves. Hard to grip a cup when it peaks.';
+      form.meds = ['Ibuprofen'];
+      form.acts = ['Desk work'];
+      form.senses = ['Fatigue'];
+      form.concern = 'Is the numbness spreading? Ask about a nerve test.';
+    }
+    this.state = {
+      tab: start === 'calendar' ? 'calendar' : start === 'reports' ? 'reports' : 'home',
+      zoom: 1, panX: 0, panY: 0, glFailed: false,
+      symptomFree: ['2026-10-16', '2026-10-23'],
+      shape: { g: 0, b: 0 }, shapesFailed: false, thumbRev: 0,
+      splash: start === 'home' ? 'in' : 'off', splashImg: false,
+      composing: start === 'report',
+      yaw: 0,
+      selected: selected,
+      form: form,
+      reports: this.seedReports(),
+      homeDay: this.TODAY,
+      calMonth: '2026-10',
+      calDay: this.TODAY,
+      area: 'all',
+      range: 30,
+      drillCat: null,
+      detailId: null,
+      toast: ''
+    };
+  }
+
+  blankForm() {
+    return { time: '14:30', cats: [], desc: '', severity: 4, sevNote: '', meds: [], medOther: '', acts: [], actOther: '', senses: [], senseOther: '', concern: '' };
+  }
+
+  bodyModel() {
+    function makeBody() {
+      // Camera matches the rendered frames: orthographic, looking slightly down.
+      const PITCH = 8 * Math.PI / 180, CY = 220;
+      const cosP = Math.cos(PITCH), sinP = Math.sin(PITCH);
+      let P = null, P0 = null, T = null, G = null, names = null, proj = null, projYaw = null;
+      function setMesh(data) {
+        P = data.p.map((v) => v / 10);
+        P0 = P.slice();
+        T = data.t;
+        G = data.g;
+        names = data.tags;
+        proj = new Float32Array(P.length);
+        projYaw = null;
+      }
+      // Moves every vertex from the default body by the weighted shape offsets.
+      function setOffsets(list) {
+        for (let i = 0; i < P.length; i++) {
+          let v = P0[i];
+          for (const o of list) if (o.w) v += o.d[i] / 10 * o.w;
+          P[i] = v;
+        }
+        projYaw = null;
+      }
+      function nearest(p) {
+        let best = Infinity, at = 0;
+        for (let i = 0; i < P.length; i += 3) {
+          const d = (P[i] - p[0]) ** 2 + (P[i + 1] - p[1]) ** 2 + (P[i + 2] - p[2]) ** 2;
+          if (d < best) { best = d; at = i; }
+        }
+        return at;
+      }
+      function toScreen(x, y, z, yaw) {
+        const t = yaw * Math.PI / 180, c = Math.cos(t), s = Math.sin(t);
+        const cx = x * c + z * s, cz = -x * s + z * c, v = y - CY;
+        return { sx: cx, sy: v * cosP + cz * sinP + CY, depth: cz * cosP - v * sinP };
+      }
+      function viewDir(yaw) {
+        const t = yaw * Math.PI / 180;
+        return [-Math.sin(t) * cosP, -sinP, Math.cos(t) * cosP];
+      }
+      function project(yaw) {
+        if (projYaw === yaw) return;
+        const t = yaw * Math.PI / 180, c = Math.cos(t), s = Math.sin(t);
+        for (let i = 0; i < P.length; i += 3) {
+          const cx = P[i] * c + P[i + 2] * s, cz = -P[i] * s + P[i + 2] * c, v = P[i + 1] - CY;
+          proj[i] = cx;
+          proj[i + 1] = v * cosP + cz * sinP + CY;
+          proj[i + 2] = cz * cosP - v * sinP;
+        }
+        projYaw = yaw;
+      }
+      // Finds the surface nearest the viewer under a screen point.
+      function cast(sx, sy, yaw) {
+        if (!P) return { hit: false };
+        project(yaw);
+        let best = -Infinity, bt = -1, bu = 0, bv = 0;
+        for (let i = 0; i < T.length; i += 3) {
+          const a = T[i] * 3, b = T[i + 1] * 3, c = T[i + 2] * 3;
+          const ax = proj[a], ay = proj[a + 1], bx = proj[b], by = proj[b + 1], cx = proj[c], cy = proj[c + 1];
+          if ((sx < ax && sx < bx && sx < cx) || (sx > ax && sx > bx && sx > cx) || (sy < ay && sy < by && sy < cy) || (sy > ay && sy > by && sy > cy)) continue;
+          const den = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy);
+          if (Math.abs(den) < 1e-9) continue;
+          const u = ((by - cy) * (sx - cx) + (cx - bx) * (sy - cy)) / den;
+          const v = ((cy - ay) * (sx - cx) + (ax - cx) * (sy - cy)) / den;
+          if (u < 0 || v < 0 || u + v > 1) continue;
+          const w = 1 - u - v;
+          const depth = u * proj[a + 2] + v * proj[b + 2] + w * proj[c + 2];
+          if (depth > best) { best = depth; bt = i; bu = u; bv = v; }
+        }
+        if (bt < 0) return { hit: false };
+        const ia = T[bt], ib = T[bt + 1], ic = T[bt + 2], bw = 1 - bu - bv;
+        const at = (i, k) => P[i * 3 + k];
+        const p = [0, 1, 2].map((k) => bu * at(ia, k) + bv * at(ib, k) + bw * at(ic, k));
+        const e1 = [0, 1, 2].map((k) => at(ib, k) - at(ia, k)), e2 = [0, 1, 2].map((k) => at(ic, k) - at(ia, k));
+        let n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+        const l = Math.hypot(n[0], n[1], n[2]) || 1;
+        n = n.map((q) => q / l);
+        const d = viewDir(yaw);
+        if (n[0] * d[0] + n[1] * d[1] + n[2] * d[2] < 0) n = n.map((q) => -q);
+        const vertex = bu >= bv && bu >= bw ? ia : bv >= bw ? ib : ic;
+        return { hit: true, p, n, depth: best, tag: names[G[vertex]] };
+      }
+      function classify(p, n, tag) {
+        const x = p[0], y = p[1], z = p[2], ax = Math.abs(x);
+        const S = x > 0 ? 'Left' : 'Right', s = S.toLowerCase();
+        const f = n[2] > 0.55 ? 'front' : n[2] < -0.55 ? 'back' : 'side';
+        const outer = n[0] * x > 0;
+        const name = (label, area) => ({ label: label, area: area });
+        const headTags = ['head', 'ear', 'nose', 'eye', 'mouth', 'chin', 'cheek', 'forehead'];
+        if (headTags.includes(tag)) {
+          if (ax > 16 && y > 29 && y < 51 && z > 4 && z < 22) return name(S + ' ear', 'head');
+          if (n[1] < -0.72 && y < 20) return name('Top of head', 'head');
+          if (f === 'back' || z < -1) return name('Back of head', 'head');
+          if (f === 'side' || (ax >= 13 && z < 30)) {
+            if (y >= 33 && z < 8) return name('Behind ' + s + ' ear', 'head');
+            if (y < 33 && z < 24) return name('Above ' + s + ' ear', 'head');
+            if (y < 33) return name(S + ' temple', 'head');
+            if (y >= 48) return name(S + ' jaw', 'head');
+            return name(S + ' cheek', 'head');
+          }
+          if (y < 30) return name('Forehead', 'head');
+          if (y < 38 && ax >= 4) return name(S + ' eye area', 'head');
+          if (ax < 5 && y < 48) return name('Nose', 'head');
+          if (ax < 8 && y >= 48 && y < 57) return name('Mouth', 'head');
+          if (ax < 11 && y >= 57) return name('Chin', 'head');
+          return name(S + (y >= 50 ? ' jaw' : ' cheek'), 'head');
+        }
+        switch (tag) {
+          case 'neck':
+            return name(f === 'front' ? 'Front of neck' : f === 'back' ? 'Back of neck' : S + ' side of neck', 'head');
+          case 'shoulder': return name((f === 'back' ? 'Back of ' + s : S) + ' shoulder', 'arms');
+          case 'upperarm':
+            if (y < 90) return name((f === 'back' ? 'Back of ' + s : S) + ' shoulder', 'arms');
+            return name(f === 'front' ? 'Front of ' + s + ' upper arm' : f === 'back' ? 'Back of ' + s + ' upper arm' : (outer ? 'Outer ' : 'Inner ') + s + ' upper arm', 'arms');
+          case 'forearm':
+            return name(f === 'front' ? S + ' forearm, palm side' : f === 'back' ? S + ' forearm, back' : (outer ? 'Outer ' : 'Inner ') + s + ' forearm', 'arms');
+          case 'palm':
+            if (y < 212) return name(S + ' wrist', 'arms');
+            return name(n[2] >= 0 ? S + ' palm' : 'Back of ' + s + ' hand', 'arms');
+          case 'thumb': return name(S + ' thumb', 'arms');
+          case 'index': return name(S + ' index finger', 'arms');
+          case 'middle': return name(S + ' middle finger', 'arms');
+          case 'ring': return name(S + ' ring finger', 'arms');
+          case 'pinky': return name(S + ' little finger', 'arms');
+          case 'torso-upper':
+            if (y < 76) return name(f === 'front' ? 'Front of neck' : f === 'back' ? 'Back of neck' : S + ' side of neck', 'head');
+            if (f === 'front') return name(ax < 6 ? 'Center of chest' : S + ' chest', 'torso');
+            if (f === 'back') return name(ax < 6 ? 'Upper spine' : S + ' upper back', 'torso');
+            return name(S + ' ribs', 'torso');
+          case 'torso-lower':
+            if (f === 'front') return name(ax < 6 && y > 165 && y < 190 ? 'Around the navel' : S + ' abdomen', 'torso');
+            if (f === 'back') return name(ax < 6 ? 'Lower spine' : S + ' lower back', 'torso');
+            return name(S + ' flank', 'torso');
+          case 'hip':
+            if (f === 'back') return name(S + ' buttock', 'torso');
+            if (f === 'front') return name(ax < 14 ? 'Groin' : S + ' hip', 'torso');
+            return name('Outer ' + s + ' hip', 'torso');
+          case 'thigh':
+            if (y < 234) {
+              if (f === 'back') return name(S + ' buttock', 'torso');
+              if (f === 'front') return name(ax < 14 ? 'Groin' : S + ' hip', 'torso');
+              return name('Outer ' + s + ' hip', 'torso');
+            }
+            if (f === 'back' && y < 252) return name(S + ' buttock', 'torso');
+            if (y > 300) return name(f === 'back' ? 'Back of ' + s + ' knee' : f === 'side' ? (outer ? 'Outer ' : 'Inner ') + s + ' knee' : S + ' kneecap', 'legs');
+            return name(f === 'front' ? 'Front of ' + s + ' thigh' : f === 'back' ? 'Back of ' + s + ' thigh' : (outer ? 'Outer ' : 'Inner ') + s + ' thigh', 'legs');
+          case 'calf':
+            if (y < 325) return name(f === 'back' ? 'Back of ' + s + ' knee' : f === 'side' ? (outer ? 'Outer ' : 'Inner ') + s + ' knee' : S + ' kneecap', 'legs');
+            if (y > 405) return name(f === 'side' ? (outer ? 'Outer ' : 'Inner ') + s + ' ankle' : f === 'back' ? S + ' Achilles' : 'Front of ' + s + ' ankle', 'legs');
+            return name(f === 'front' ? S + ' shin' : f === 'back' ? S + ' calf' : (outer ? 'Outer ' : 'Inner ') + s + ' lower leg', 'legs');
+          case 'foot':
+            if (n[1] > 0.6) return name('Sole of ' + s + ' foot', 'legs');
+            if (z < 0) return name(S + ' heel', 'legs');
+            if (y < 412) return name(f === 'side' ? (outer ? 'Outer ' : 'Inner ') + s + ' ankle' : f === 'back' ? S + ' Achilles' : 'Front of ' + s + ' ankle', 'legs');
+            return name('Top of ' + s + ' foot', 'legs');
+          case 'toe1': return name(S + ' big toe', 'legs');
+          case 'toe2': return name(S + ' second toe', 'legs');
+          case 'toe3': return name(S + ' third toe', 'legs');
+          case 'toe4': return name(S + ' fourth toe', 'legs');
+          case 'toe5': return name(S + ' little toe', 'legs');
+        }
+        return name('Body', 'torso');
+      }
+      return { setMesh, setOffsets, nearest, positions: () => P, toScreen, viewDir, cast, classify, ready: () => !!P };
+    }
+    return makeBody();
+  }
+
+  zonePoint(id) {
+    // Sample-data locations, baked from the same mesh so reports show before it has loaded.
+    const seeds = {"f-forearm-L":{"p":[65,171.6,6.68],"n":[0.18,-0.37,0.91],"label":"Left forearm, palm side","area":"arms"},"f-hand-L":{"p":[77,213.09,27.63],"n":[-0.58,0.08,0.81],"label":"Left palm","area":"arms"},"f-index-L":{"p":[85,226.73,38.34],"n":[0.11,-0.85,0.52],"label":"Left index finger","area":"arms"},"f-little-L":{"p":[68,228.35,26.79],"n":[0.43,-0.19,0.88],"label":"Left little finger","area":"arms"},"f-knee-R":{"p":[-28,315.63,23.74],"n":[0.49,0.36,0.8],"label":"Right kneecap","area":"legs"},"f-lower-R":{"p":[-28,369.2,16.18],"n":[0.3,0.06,0.95],"label":"Right shin","area":"legs"},"f-chest-L":{"p":[24,111.92,36.11],"n":[0.22,-0.33,0.92],"label":"Left chest","area":"torso"},"f-upperarm-L":{"p":[58,123.35,5.13],"n":[0.65,0.08,0.76],"label":"Front of left upper arm","area":"arms"},"f-head":{"p":[0,17.94,36.61],"n":[-0.02,-0.49,0.87],"label":"Forehead","area":"head"},"b-abdomen-L":{"p":[18,187.89,-12.92],"n":[0.23,-0.54,-0.81],"label":"Left lower back","area":"torso"},"b-abdomen-R":{"p":[-18,187.89,-12.92],"n":[-0.23,-0.54,-0.81],"label":"Right lower back","area":"torso"},"b-neck":{"p":[0,64.12,-2.64],"n":[-0.01,-0.23,-0.97],"label":"Back of neck","area":"head"},"b-shoulder-L":{"p":[46,89.61,-8.05],"n":[0.39,-0.09,-0.92],"label":"Back of left shoulder","area":"arms"},"b-chest-R":{"p":[-26,111.88,-14.88],"n":[-0.34,0.18,-0.92],"label":"Right upper back","area":"torso"},"r-above-ear":{"p":[-17.4,21.65,16],"n":[-0.99,-0.11,0.12],"label":"Above right ear","area":"head"}};
+    const a = seeds[id];
+    return { id: 'p' + Math.random().toString(36).slice(2, 9), p: a.p, n: a.n, label: a.label, area: a.area };
+  }
+
+  pointAt(sx, sy, yaw) {
+    const r = this.BODY.cast(sx, sy, yaw);
+    if (!r.hit) return null;
+    const c = this.BODY.classify(r.p, r.n, r.tag);
+    return { id: 'p' + Math.random().toString(36).slice(2, 9), p: r.p, n: r.n, label: c.label, area: c.area };
+  }
+
+  componentDidMount() {
+    // If the image never reports back, the app still opens.
+    if (this.state.splash === 'in') this.splashTimer = setTimeout(() => this.splashOut(), 3000);
+    fetch('body-mesh.json').then((r) => r.json()).then((data) => {
+      this.BODY.setMesh(data);
+      this.meshData = data;
+      this.setState({ meshReady: true });
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem('bodyShape')); } catch (e) { saved = null; }
+      if (saved && (saved.g || saved.b)) this.setBody(saved);
+    }).catch(() => {
+      this.setState({ meshFailed: true });
+    });
+  }
+
+  seedReports() {
+    const T = 'Tingling / numbness', P = 'Pain', R = 'Rash / skin', I = 'Itching', B = 'Burning', S = 'Stiffness', W = 'Swelling';
+    const rows = [
+      ['2026-10-27', '07:40', [T], 5, ['f-forearm-L', 'f-hand-L'], 'Pins and needles from the forearm into the last two fingers.', 'Eased after about ten minutes.', [], ['Sleeping'], [], ''],
+      ['2026-10-27', '12:15', [P, S], 4, ['b-abdomen-L', 'b-abdomen-R'], 'Dull ache across the lower back.', '', ['Ibuprofen'], ['Desk work'], [], ''],
+      ['2026-10-26', '18:30', [P, W], 7, ['f-knee-R'], 'Sharp pain on stairs, knee looks puffy.', 'Had to stop my walk early.', ['Ibuprofen'], ['Exercise'], [], 'Should this be imaged?'],
+      ['2026-10-25', '21:10', [R, I], 3, ['f-chest-L', 'f-upperarm-L'], 'Raised red patches, very itchy.', '', ['Antihistamine'], ['Resting'], [], ''],
+      ['2026-10-24', '08:05', [T], 6, ['f-index-L', 'f-little-L'], 'Numb fingertips on waking.', 'Dropped a cup.', [], ['Sleeping'], ['Poor sleep'], 'Is this getting worse?'],
+      ['2026-10-22', '13:45', [S], 4, ['b-neck', 'b-shoulder-L'], 'Tight neck and shoulder.', '', [], ['Desk work'], ['Headache'], ''],
+      ['2026-10-21', '19:20', [P], 6, ['f-knee-R', 'f-lower-R'], 'Aching from knee into shin.', '', ['Ibuprofen'], ['Walking'], [], ''],
+      ['2026-10-20', '07:55', [T, B], 5, ['f-forearm-L'], 'Tingling with a burning line along the forearm.', '', ['Gabapentin'], ['Sleeping'], [], ''],
+      ['2026-10-19', '16:10', [P], 4, ['r-above-ear'], 'Dull pressure just above the ear.', '', [], ['Desk work'], ['Headache'], ''],
+      ['2026-10-18', '22:00', [I], 2, ['f-upperarm-L'], 'Mild itch where the rash was.', '', ['Topical cream'], ['Resting'], [], ''],
+      ['2026-10-17', '10:30', [S, P], 5, ['b-abdomen-R'], 'Stiff lower back after gardening.', '', [], ['Housework'], ['Fatigue'], ''],
+      ['2026-10-15', '08:10', [T], 4, ['f-little-L'], 'Pins and needles in the ring and little fingers.', '', ['Gabapentin'], ['Sleeping'], [], ''],
+      ['2026-10-14', '17:40', [P, W], 8, ['f-knee-R'], 'Swollen knee after a run.', 'Could not bend it fully.', ['Ibuprofen'], ['Exercise'], [], 'Book a physio visit?'],
+      ['2026-10-12', '20:30', [R, B], 5, ['f-chest-L'], 'New rash, hot to the touch.', '', ['Topical cream'], ['Resting'], ['Fatigue'], ''],
+      ['2026-10-11', '09:15', [T], 3, ['f-forearm-L'], 'Light tingling.', '', [], ['Driving'], [], ''],
+      ['2026-10-09', '14:05', [P], 3, ['f-head'], 'Pressure behind the forehead.', '', [], ['Desk work'], ['Headache'], ''],
+      ['2026-10-08', '07:30', [T], 5, ['f-forearm-L', 'f-hand-L'], 'Woke with a numb arm.', '', [], ['Sleeping'], ['Poor sleep'], ''],
+      ['2026-10-06', '12:50', [S], 3, ['b-abdomen-L'], 'Stiff after sitting all morning.', '', [], ['Desk work'], [], ''],
+      ['2026-10-04', '18:15', [P], 5, ['f-knee-R'], 'Ache after a long walk.', '', ['Ibuprofen'], ['Walking'], [], ''],
+      ['2026-10-02', '21:40', [I], 3, ['b-chest-R'], 'Itchy patch I can barely reach.', '', ['Antihistamine'], ['Resting'], [], ''],
+      ['2026-09-29', '08:00', [T], 4, ['f-hand-L'], 'Fingertips numb on waking.', '', [], ['Sleeping'], [], ''],
+      ['2026-09-24', '16:20', [P, S], 4, ['b-abdomen-L', 'b-abdomen-R'], 'Lower back ache.', '', [], ['Housework'], [], ''],
+      ['2026-09-17', '07:45', [T], 3, ['f-forearm-L'], 'Light tingling on waking.', '', [], ['Sleeping'], [], ''],
+      ['2026-09-09', '19:00', [P], 4, ['f-knee-R'], 'Knee ache after exercise.', '', ['Ibuprofen'], ['Exercise'], [], '']
+    ];
+    return rows.map((r, i) => ({
+      id: 'r' + i, date: r[0], time: r[1], cats: r[2], severity: r[3],
+      points: r[4].map((z) => this.zonePoint(z)),
+      desc: r[5], sevNote: r[6], meds: r[7], acts: r[8], senses: r[9], concern: r[10]
+    }));
+  }
+
+  parse(d) { const p = d.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+  iso(dt) { const m = String(dt.getMonth() + 1).padStart(2, '0'); const d = String(dt.getDate()).padStart(2, '0'); return dt.getFullYear() + '-' + m + '-' + d; }
+  addDays(d, n) { const dt = this.parse(d); dt.setDate(dt.getDate() + n); return this.iso(dt); }
+  fmtDay(d) { return this.parse(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); }
+  fmtShort(d) { return this.parse(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+  fmtTime(t) { const p = t.split(':').map(Number); const h = p[0] % 12 || 12; return h + ':' + String(p[1]).padStart(2, '0') + (p[0] < 12 ? ' AM' : ' PM'); }
+  partOf(t) { const h = Number(t.split(':')[0]); return h >= 5 && h < 12 ? 'Morning' : h >= 12 && h < 17 ? 'Afternoon' : h >= 17 && h < 21 ? 'Evening' : 'Night'; }
+  sevWord(n) { n = Number(n); return n === 0 ? 'none' : n <= 3 ? 'mild' : n <= 6 ? 'moderate' : n <= 9 ? 'severe' : 'worst imaginable'; }
+  plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
+  pos(pt, yaw) {
+    const q = this.BODY.toScreen(pt.p[0], pt.p[1], pt.p[2], yaw);
+    return { l: ((q.sx + 120) / 240 * 100) + '%', t: (q.sy / 440 * 100) + '%' };
+  }
+  shownYaw() {
+    // Frames exist every 5 degrees; negative angles are the mirror image of positive ones.
+    const y = this.state.yaw;
+    return (y < 0 ? -1 : 1) * Math.round(Math.abs(y) / 5) * 5;
+  }
+  normYaw(y) { let v = ((y + 180) % 360 + 360) % 360 - 180; return v === -180 ? 180 : v; }
+  isVisible(pt, yaw) {
+    const d = this.BODY.viewDir(yaw);
+    if (pt.n[0] * d[0] + pt.n[1] * d[1] + pt.n[2] * d[2] < 0.02) return false;
+    if (!this.BODY.ready()) return true;
+    const key = pt.id + '|' + yaw;
+    if (this.seen.has(key)) return this.seen.get(key);
+    const q = this.BODY.toScreen(pt.p[0], pt.p[1], pt.p[2], yaw);
+    const r = this.BODY.cast(q.sx, q.sy, yaw);
+    const visible = !r.hit || r.depth <= q.depth + 2;
+    this.seen.set(key, visible);
+    return visible;
+  }
+
+  chip(label, on, pick) {
+    return { label: label, on: on, pick: pick, bg: on ? '#0B6169' : '#FFFFFF', fg: on ? '#FFFFFF' : '#14282C', bd: on ? '#0B6169' : '#C4D0D0' };
+  }
+
+  setForm(key) { return (e) => { const v = e.target.value; this.setState((s) => ({ form: { ...s.form, [key]: v } })); }; }
+  toggleForm(key, v) {
+    return () => this.setState((s) => {
+      const has = s.form[key].includes(v);
+      return { form: { ...s.form, [key]: has ? s.form[key].filter((x) => x !== v) : s.form[key].concat([v]) } };
+    });
+  }
+  flash(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 2800);
+  }
+  componentWillUnmount() { clearTimeout(this.toastTimer); clearInterval(this.snapTimer); clearTimeout(this.splashTimer); }
+
+  calmMotion() {
+    return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+  splashLoaded() {
+    if (this.state.splash !== 'in') return;
+    clearTimeout(this.splashTimer);
+    this.setState({ splashImg: true });
+    this.splashTimer = setTimeout(() => this.splashOut(), this.SPLASH_IN + this.SPLASH_HOLD);
+  }
+  splashOut() {
+    if (this.state.splash !== 'in') return;
+    clearTimeout(this.splashTimer);
+    this.setState({ splash: 'out' });
+    if (typeof window !== 'undefined' && window.appSplashFade) window.appSplashFade();
+    this.splashTimer = setTimeout(() => this.setState({ splash: 'off' }), (this.calmMotion() ? 0 : this.SPLASH_FADE) + 50);
+  }
+  figSize() {
+    const h = Math.min(640, (Number(this.props.phoneH) || 844) - 260 - this.FEET_GAP);
+    return { h: h, w: h * 240 / 440 };
+  }
+  clampPan(z, x, y) {
+    const f = this.figSize();
+    const mx = f.w * z / 2, my = f.h * z / 2;
+    return z <= 1 ? { panX: 0, panY: 0 } : { panX: Math.max(-mx, Math.min(mx, x)), panY: Math.max(-my, Math.min(my, y)) };
+  }
+  // Scales about a screen point, so what is under the fingers stays there.
+  zoomAbout(z, fx, fy, stage) {
+    const next = Math.max(1, Math.min(this.MAX_ZOOM, z));
+    const s = this.state;
+    const r = stage.querySelector('[data-fig]').getBoundingClientRect();
+    const k = 1 - next / s.zoom;
+    const scale = r.width / (this.figSize().w * s.zoom) || 1;
+    const p = this.clampPan(next, s.panX + (fx - (r.left + r.width / 2)) * k / scale, s.panY + (fy - (r.top + r.height / 2)) * k / scale);
+    this.setState({ zoom: next, panX: p.panX, panY: p.panY });
+  }
+  zoomStep(e, factor) {
+    const stage = e.currentTarget.closest('[data-stage]');
+    this.stageEl = stage;
+    clearInterval(this.snapTimer);
+    const r = stage.getBoundingClientRect();
+    const z = this.state.zoom * factor;
+    this.zoomAbout(z < 1.05 ? 1 : z, r.left + r.width / 2, r.top + r.height / 2, stage);
+  }
+  resetZoom() { return { zoom: 1, panX: 0, panY: 0 }; }
+  // The surface point at the middle of the view, which stays there while the body turns.
+  viewAnchor() {
+    const stage = this.stageEl;
+    if (!stage || this.state.zoom <= 1) return null;
+    const st = stage.getBoundingClientRect(), r = stage.querySelector('[data-fig]').getBoundingClientRect();
+    const sx = (st.left + st.width / 2 - r.left) / r.width * 240 - 120;
+    const sy = (st.top + st.height / 2 - r.top) / r.height * 440;
+    const yaw = this.shownYaw();
+    const hit = this.BODY.cast(sx, sy, yaw);
+    if (hit.hit) return hit.p;
+    const t = yaw * Math.PI / 180;
+    return [sx * Math.cos(t), (sy - 220) / Math.cos(8 * Math.PI / 180) + 220, sx * Math.sin(t)];
+  }
+  panForAnchor(p, yaw, z) {
+    const f = this.figSize();
+    const q = this.BODY.toScreen(p[0], p[1], p[2], yaw);
+    return this.clampPan(z, -q.sx / 240 * f.w * z, this.FEET_GAP / 2 - (q.sy - 220) / 440 * f.h * z);
+  }
+  stageDown(e) {
+    this.stageEl = e.currentTarget.parentNode;
+    if (!this.touches) this.touches = new Map();
+    this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
+    clearInterval(this.snapTimer);
+    if (this.touches.size === 2) {
+      const t = Array.from(this.touches.values());
+      this.pinch = { d: Math.hypot(t[0].x - t[1].x, t[0].y - t[1].y) || 1, z: this.state.zoom, mx: (t[0].x + t[1].x) / 2, my: (t[0].y + t[1].y) / 2 };
+      this.drag = null;
+      return;
+    }
+    if (this.touches.size === 1) {
+      this.pinch = null;
+      this.drag = { x: e.clientX, y: e.clientY, yaw: this.state.yaw, panX: this.state.panX, panY: this.state.panY, moved: false };
+    }
+  }
+  stageMove(e) {
+    if (this.touches && this.touches.has(e.pointerId)) this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (this.pinch && this.touches.size >= 2) {
+      const t = Array.from(this.touches.values());
+      const mx = (t[0].x + t[1].x) / 2, my = (t[0].y + t[1].y) / 2;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const scale = rect.width / (e.currentTarget.clientWidth || rect.width) || 1;
+      this.zoomAbout(this.pinch.z * Math.hypot(t[0].x - t[1].x, t[0].y - t[1].y) / this.pinch.d, mx, my, e.currentTarget.parentNode);
+      this.setState((s) => this.clampPan(s.zoom, s.panX + (mx - this.pinch.mx) / scale, s.panY + (my - this.pinch.my) / scale));
+      this.pinch.mx = mx;
+      this.pinch.my = my;
+      return;
+    }
+    if (!this.drag) return;
+    const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
+    if (Math.hypot(dx, dy) > 6) this.drag.moved = true;
+    if (!this.drag.moved) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const scale = rect.width / (e.currentTarget.clientWidth || rect.width) || 1;
+    if (this.state.zoom > 1) {
+      this.setState(this.clampPan(this.state.zoom, this.drag.panX + dx / scale, this.drag.panY + dy / scale));
+      return;
+    }
+    const w = rect.width || 318;
+    this.setState({ yaw: this.normYaw(this.drag.yaw + dx / w * 318 * 0.7) });
+  }
+  stageUp(e) {
+    const tapped = this.drag && !this.drag.moved;
+    this.drag = null;
+    if (this.touches) this.touches.delete(e.pointerId);
+    if (!this.touches || this.touches.size === 0) {
+      if (this.pinch && this.state.zoom < 1.05) this.setState(this.resetZoom());
+      this.pinch = null;
+    }
+    if (tapped) this.stageTap(e);
+  }
+  stageCancel(e) {
+    this.drag = null;
+    this.pinch = null;
+    if (this.touches) this.touches.delete(e.pointerId);
+  }
+  stageTap(e) {
+    const rect = e.currentTarget.parentNode.querySelector('[data-fig]').getBoundingClientRect();
+    const sx = (e.clientX - rect.left) / rect.width * 240 - 120;
+    const sy = (e.clientY - rect.top) / rect.height * 440;
+    if (!this.BODY.ready()) {
+      this.flash(this.state.meshFailed ? 'Body data could not load. Try reloading.' : 'Body is still loading. Try again in a moment.');
+      return;
+    }
+    const pt = this.pointAt(sx, sy, this.shownYaw());
+    if (pt) {
+      this.placedAt = Date.now();
+      this.setState((s) => ({ selected: s.selected.concat([pt]) }));
+    }
+  }
+  handleBack() {
+    const s = this.state;
+    if (s.detailId) { this.setState({ detailId: null }); return true; }
+    if (s.composing) { this.setState({ composing: false }); return true; }
+    if (s.tab !== 'home') { this.setState({ tab: 'home' }); return true; }
+    if (s.zoom > 1) { this.setState(this.resetZoom()); return true; }
+    if (s.selected.length) { this.setState({ selected: [] }); return true; }
+    return false;
+  }
+  stageKey(e) {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      const step = e.key === 'ArrowRight' ? 15 : -15;
+      this.snapTo(this.normYaw(this.state.yaw + step));
+    }
+    if (e.key === '+' || e.key === '=') this.zoomStep(e, 2);
+    if (e.key === '-') this.zoomStep(e, 0.5);
+  }
+  snapTo(target) {
+    clearInterval(this.snapTimer);
+    const anchor = this.viewAnchor();
+    const go = (yaw) => {
+      const q = (yaw < 0 ? -1 : 1) * Math.round(Math.abs(yaw) / 5) * 5;
+      this.setState(anchor ? { yaw: yaw, ...this.panForAnchor(anchor, q, this.state.zoom) } : { yaw: yaw });
+    };
+    this.snapTimer = setInterval(() => {
+      const gap = this.normYaw(target - this.state.yaw);
+      if (Math.abs(gap) <= 10) { clearInterval(this.snapTimer); go(target); return; }
+      go(this.normYaw(this.state.yaw + (gap > 0 ? 10 : -10)));
+    }, 16);
+  }
+  // Zoomed views and custom shapes are drawn live from the mesh, with the frames' camera and lighting.
+  glInit(canvas) {
+    const data = this.meshData;
+    const gl = data && data.n && data.a && canvas.getContext('webgl', { antialias: true, alpha: true });
+    if (!gl) return null;
+    const shader = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, shader(gl.VERTEX_SHADER, `
+      attribute vec3 aP; attribute vec3 aN; attribute float aO;
+      uniform float uC, uS, uCp, uSp; uniform vec4 uMap;
+      varying vec3 vN; varying float vO;
+      void main() {
+        float cx = aP.x * uC + aP.z * uS, cz = -aP.x * uS + aP.z * uC, v = aP.y - 220.0;
+        float sy = v * uCp + cz * uSp + 220.0, d = cz * uCp - v * uSp;
+        float nx = aN.x * uC + aN.z * uS, nz = -aN.x * uS + aN.z * uC;
+        vN = vec3(nx, aN.y * uCp + nz * uSp, nz * uCp - aN.y * uSp);
+        vO = aO;
+        gl_Position = vec4((cx + 120.0) * uMap.x + uMap.z, sy * uMap.y + uMap.w, -d / 300.0, 1.0);
+      }`));
+    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, `
+      precision highp float;
+      varying vec3 vN; varying float vO;
+      void main() {
+        vec3 n = normalize(vN);
+        vec3 key = normalize(vec3(0.0, -0.55, 0.83));
+        vec3 hv = normalize(key + vec3(0.0, 0.0, 1.0));
+        float diff = max(0.0, dot(n, key));
+        float hemi = 0.5 - 0.5 * n.y;
+        float spec = pow(max(0.0, dot(n, hv)), 26.0) * 0.1;
+        float rim = pow(1.0 - max(0.0, n.z), 3.0) * 0.18;
+        float ao = 0.28 + 0.72 * vO;
+        float shade = clamp(((0.5 * diff + 0.4 * hemi + 0.1) * ao + spec) * (1.0 - rim), 0.0, 1.0);
+        gl_FragColor = vec4(mix(vec3(84.0, 102.0, 106.0), vec3(232.0, 239.0, 238.0), shade) / 255.0, 1.0);
+      }`));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    gl.useProgram(prog);
+    const attr = (name, values, size) => {
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, values, gl.DYNAMIC_DRAW);
+      const loc = gl.getAttribLocation(prog, name);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+      return buf;
+    };
+    const ctx = { gl: gl, canvas: canvas, count: data.t.length, ver: -1 };
+    ctx.bufP = attr('aP', Float32Array.from(this.BODY.positions()), 3);
+    ctx.bufN = attr('aN', this.morphN || Float32Array.from(data.n, (v) => v / 100), 3);
+    attr('aO', Float32Array.from(data.a, (v) => v / 100), 1);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Uint16Array.from(data.t), gl.STATIC_DRAW);
+    gl.enable(gl.DEPTH_TEST);
+    gl.clearColor(0, 0, 0, 0);
+    canvas.addEventListener('webglcontextlost', () => {
+      if (!ctx.released) { this.glCtxs = []; this.setState({ glFailed: true }); }
+    });
+    ['uC', 'uS', 'uCp', 'uSp', 'uMap'].forEach((n) => { ctx[n] = gl.getUniformLocation(prog, n); });
+    return ctx;
+  }
+  // Screens rebuild their canvases, so contexts for canvases that have gone are given back.
+  glFor(canvas) {
+    this.glCtxs = (this.glCtxs || []).filter((c) => {
+      if (c.keep || c.canvas.isConnected) return true;
+      c.released = true;
+      const ext = c.gl.getExtension('WEBGL_lose_context');
+      if (ext) ext.loseContext();
+      return false;
+    });
+    let ctx = this.glCtxs.find((c) => c.canvas === canvas);
+    if (!ctx) {
+      ctx = this.glInit(canvas);
+      if (!ctx) { this.setState({ glFailed: true }); return null; }
+      this.glCtxs.push(ctx);
+    }
+    if (ctx.ver !== this.shapeVer) {
+      const gl = ctx.gl;
+      gl.bindBuffer(gl.ARRAY_BUFFER, ctx.bufP);
+      gl.bufferData(gl.ARRAY_BUFFER, Float32Array.from(this.BODY.positions()), gl.DYNAMIC_DRAW);
+      if (this.morphN) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, ctx.bufN);
+        gl.bufferData(gl.ARRAY_BUFFER, this.morphN, gl.DYNAMIC_DRAW);
+      }
+      ctx.ver = this.shapeVer;
+    }
+    return ctx;
+  }
+  glSize(canvas) {
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
+    const w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    return { w: w, h: h };
+  }
+  glPaint(ctx, yaw, map) {
+    const gl = ctx.gl, t = yaw * Math.PI / 180, p = 8 * Math.PI / 180;
+    gl.uniform1f(ctx.uC, Math.cos(t));
+    gl.uniform1f(ctx.uS, Math.sin(t));
+    gl.uniform1f(ctx.uCp, Math.cos(p));
+    gl.uniform1f(ctx.uSp, Math.sin(p));
+    gl.uniform4f(ctx.uMap, map[0], map[1], map[2], map[3]);
+    gl.drawElements(gl.TRIANGLES, ctx.count, gl.UNSIGNED_SHORT, 0);
+  }
+  // Fits the whole figure into a viewport of the given pixel size.
+  fitMap(w, h) {
+    const k = 0.96, fw = h * k * 240 / 440;
+    const a = 2 * fw / 240 / w;
+    return [a, -2 * k / 440, -a * 120, k];
+  }
+  glDraw() {
+    this.glPending = false;
+    const s = this.state;
+    if (s.glFailed || !this.meshData) return;
+    if (this.previewEl && this.previewEl.isConnected) {
+      const ctx = this.glFor(this.previewEl);
+      if (ctx) {
+        const gl = ctx.gl, z = this.glSize(this.previewEl), half = Math.floor(z.w / 2);
+        gl.viewport(0, 0, z.w, z.h);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        const map = this.fitMap(half, z.h);
+        gl.viewport(0, 0, half, z.h);
+        this.glPaint(ctx, 0, map);
+        gl.viewport(half, 0, half, z.h);
+        this.glPaint(ctx, 90, map);
+      }
+    }
+    const stage = this.stageEl;
+    if (stage && stage.isConnected && s.tab === 'home' && !s.composing && this.bodyLive()) {
+      const canvas = stage.querySelector('canvas');
+      const ctx = canvas.clientWidth ? this.glFor(canvas) : null;
+      if (ctx) {
+        const gl = ctx.gl, z = this.glSize(canvas);
+        gl.viewport(0, 0, z.w, z.h);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        const st = stage.getBoundingClientRect(), r = stage.querySelector('[data-fig]').getBoundingClientRect();
+        this.glPaint(ctx, this.shownYaw(), [2 * r.width / 240 / st.width, -2 * r.height / 440 / st.height, 2 * (r.left - st.left) / st.width - 1, 1 - 2 * (r.top - st.top) / st.height]);
+      }
+    }
+  }
+  scheduleDraw() {
+    if (this.glPending || typeof requestAnimationFrame !== 'function') return;
+    this.glPending = true;
+    requestAnimationFrame(() => this.glDraw());
+  }
+  customShape() { const b = this.shapeNow || this.state.shape; return !!(b.g || b.b); }
+  bodyLive() {
+    const s = this.state;
+    return (s.zoom > 1 || (this.customShape() && this.shapeVer > 0)) && !!this.meshData && !s.glFailed;
+  }
+  loadShapes() {
+    if (!this.shapesLoad) {
+      this.shapesLoad = fetch(this.SHAPES_URL).then((r) => r.json()).then((data) => {
+        this.shapeData = data;
+        this.applyShape();
+      }).catch(() => this.setState({ shapesFailed: true }));
+    }
+    return this.shapesLoad;
+  }
+  setBody(next) {
+    this.shapeNow = next;
+    this.setState({ shape: next });
+    try { localStorage.setItem('bodyShape', JSON.stringify(next)); } catch (e) { /* the choice just won't be remembered */ }
+    if (this.shapeData) this.applyShape(); else this.loadShapes();
+  }
+  // Morphs the body and carries every marked point along with its nearest vertex.
+  applyShape() {
+    if (!this.shapeData || !this.meshData) return;
+    const b = this.shapeNow || this.state.shape, d = this.shapeData;
+    const P = this.BODY.positions();
+    const pts = [];
+    this.state.selected.forEach((p) => pts.push(p));
+    this.state.reports.forEach((r) => r.points.forEach((p) => pts.push(p)));
+    pts.forEach((p) => {
+      if (p.v === undefined) p.v = this.BODY.nearest(p.p);
+      p.o = [p.p[0] - P[p.v], p.p[1] - P[p.v + 1], p.p[2] - P[p.v + 2]];
+    });
+    // MakeHuman's heaviest setting is still moderate, so the end of the Build slider goes somewhat past it.
+    this.BODY.setOffsets([
+      { d: d.f, w: Math.max(0, -b.g) / 100 }, { d: d.m, w: Math.max(0, b.g) / 100 },
+      { d: d.s, w: Math.max(0, -b.b) / 100 }, { d: d.h, w: Math.max(0, b.b) / 100 * 1.5 }
+    ]);
+    pts.forEach((p) => { p.p = [P[p.v] + p.o[0], P[p.v + 1] + p.o[1], P[p.v + 2] + p.o[2]]; });
+    this.seen.clear();
+    this.morphNormals();
+    this.shapeVer++;
+    this.setState({ thumbRev: this.state.thumbRev + 1 });
+    this.scheduleDraw();
+  }
+  rawNormals(P, T) {
+    const n = new Float32Array(P.length);
+    for (let i = 0; i < T.length; i += 3) {
+      const a = T[i] * 3, b = T[i + 1] * 3, c = T[i + 2] * 3;
+      const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2];
+      const vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
+      const x = uy * vz - uz * vy, y = uz * vx - ux * vz, z = ux * vy - uy * vx;
+      for (const q of [a, b, c]) { n[q] += x; n[q + 1] += y; n[q + 2] += z; }
+    }
+    for (let i = 0; i < n.length; i += 3) {
+      const l = Math.hypot(n[i], n[i + 1], n[i + 2]) || 1;
+      n[i] /= l; n[i + 1] /= l; n[i + 2] /= l;
+    }
+    return n;
+  }
+  // Keeps the baked smoothing: only the change in surface direction since the default body is added.
+  morphNormals() {
+    const data = this.meshData, T = data.t;
+    if (!this.rawBase) {
+      this.rawBase = this.rawNormals(data.p.map((v) => v / 10), T);
+      let dot = 0;
+      for (let i = 0; i < this.rawBase.length; i++) dot += this.rawBase[i] * data.n[i];
+      this.rawSign = dot < 0 ? -1 : 1;
+    }
+    const raw = this.rawNormals(this.BODY.positions(), T), out = new Float32Array(raw.length);
+    for (let i = 0; i < raw.length; i += 3) {
+      const x = data.n[i] / 100 + this.rawSign * (raw[i] - this.rawBase[i]);
+      const y = data.n[i + 1] / 100 + this.rawSign * (raw[i + 1] - this.rawBase[i + 1]);
+      const z = data.n[i + 2] / 100 + this.rawSign * (raw[i + 2] - this.rawBase[i + 2]);
+      const l = Math.hypot(x, y, z) || 1;
+      out[i] = x / l; out[i + 1] = y / l; out[i + 2] = z / l;
+    }
+    this.morphN = out;
+  }
+  // The calendar's small figures follow the chosen shape.
+  makeThumbs() {
+    this.thumbPending = false;
+    if (this.state.glFailed || !this.meshData) return;
+    if (!this.thumbCanvas) {
+      this.thumbCanvas = document.createElement('canvas');
+      this.thumbCanvas.width = 258;
+      this.thumbCanvas.height = 474;
+    }
+    const ctx = this.glFor(this.thumbCanvas);
+    if (!ctx) return;
+    ctx.keep = true;
+    const gl = ctx.gl, map = [2 / 240, -2 / 440, -1, 1];
+    const shot = (yaw) => {
+      gl.viewport(0, 0, 258, 474);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      this.glPaint(ctx, yaw, map);
+      return this.thumbCanvas.toDataURL('image/png');
+    };
+    this.thumbs = { ver: this.shapeVer, f: shot(0), b: shot(180) };
+    this.setState({ thumbRev: this.state.thumbRev + 1 });
+  }
+  settingsVals() {
+    const s = this.state, b = s.shape;
+    const on = s.tab === 'settings' && !s.composing;
+    if (on) this.scheduleDraw();
+    const pick = (key) => (e) => {
+      const v = Number(e.target.value);
+      this.setBody({ ...(this.shapeNow || this.state.shape), [key]: Math.abs(v) < 6 ? 0 : v });
+    };
+    const word = (v, low, high) => v === 0 ? 'Default' : (v < 0 ? low : high) + ', ' + Math.abs(v) + ' percent';
+    const isDefault = !b.g && !b.b;
+    return {
+      bodyOptionsOn: !s.glFailed && !s.shapesFailed,
+      bodyOptionsOff: s.glFailed || s.shapesFailed,
+      previewProbe: this.FRAMES[0],
+      previewLoad: (e) => {
+        this.previewEl = e.currentTarget.parentNode.querySelector('canvas');
+        this.loadShapes();
+        this.scheduleDraw();
+      },
+      bodyG: b.g,
+      bodyB: b.b,
+      bodyGText: word(b.g, 'Feminine', 'Masculine'),
+      bodyBText: word(b.b, 'Slimmer', 'Fuller'),
+      setBodyG: pick('g'),
+      setBodyB: pick('b'),
+      bodyIsDefault: isDefault,
+      bodyResetColor: isDefault ? '#A5B4B5' : '#0B6169',
+      resetBody: () => this.setBody({ g: 0, b: 0 })
+    };
+  }
+  removePin(id) { this.setState((s) => ({ selected: s.selected.filter((p) => p.id !== id) })); }
+
+  saveReport() {
+    const s = this.state, f = s.form;
+    const extra = (list, other) => other.trim() ? list.concat([other.trim()]) : list;
+    const rep = {
+      id: 'n' + Date.now(), date: s.homeDay, time: f.time, cats: f.cats, severity: Number(f.severity),
+      points: s.selected, desc: f.desc, sevNote: f.sevNote,
+      meds: extra(f.meds, f.medOther), acts: extra(f.acts, f.actOther), senses: extra(f.senses, f.senseOther), concern: f.concern
+    };
+    const n = s.selected.length;
+    this.setState({ reports: [rep].concat(s.reports), symptomFree: s.symptomFree.filter((d) => d !== rep.date), selected: [], form: this.blankForm(), composing: false, tab: 'home', ...this.resetZoom(), calDay: s.homeDay, calMonth: s.homeDay.slice(0, 7) });
+    this.flash('Report saved with ' + this.plural(n, 'point'));
+  }
+
+  homeVals() {
+    const s = this.state;
+    const dayReports = s.reports.filter((r) => r.date === s.homeDay);
+    const onMap = s.tab === 'home' && !s.composing;
+    const yaw = this.shownYaw();
+    const idx = Math.round(Math.abs(yaw) / 5);
+    const views = [['Front', 0], ['Right', 90], ['Back', 180], ['Left', -90]];
+    const nearFront = Math.abs(yaw) < 50, nearBack = Math.abs(yaw) > 130;
+    const names = s.selected.map((p) => p.label);
+    const zoom = onMap ? s.zoom : 1, panX = onMap ? s.panX : 0, panY = onMap ? s.panY : 0;
+    const showGL = onMap && this.bodyLive();
+    if (showGL) this.scheduleDraw();
+    return {
+      homeTitle: s.homeDay === this.TODAY ? 'Today' : this.fmtDay(s.homeDay),
+      homeSub: (s.homeDay === this.TODAY ? this.fmtDay(s.homeDay) + ' · ' : '') + this.plural(dayReports.length, 'report'),
+      isToday: s.homeDay === this.TODAY,
+      nextColor: s.homeDay === this.TODAY ? '#A5B4B5' : '#14282C',
+      dayPrev: () => this.setState((q) => ({ homeDay: this.addDays(q.homeDay, -1) })),
+      dayNext: () => this.setState((q) => ({ homeDay: q.homeDay === this.TODAY ? q.homeDay : this.addDays(q.homeDay, 1) })),
+      viewChips: views.map((v) => {
+        const on = Math.abs(this.normYaw(s.yaw - v[1])) <= 22.5;
+        return { label: v[0], on: on, pick: () => this.snapTo(v[1]), bg: on ? '#0B6169' : 'transparent', fg: on ? '#FFFFFF' : '#14282C' };
+      }),
+      showSideLabels: nearFront || nearBack,
+      screenLeftSide: nearFront ? 'Right' : 'Left',
+      screenRightSide: nearFront ? 'Left' : 'Right',
+      bodyFrames: this.FRAMES.map((url, i) => ({ url: url, opacity: i === idx && !showGL ? 1 : 0 })),
+      glDisplay: showGL ? 'block' : 'none',
+      figLoad: (e) => { this.stageEl = e.currentTarget.closest('[data-stage]'); this.scheduleDraw(); },
+      figTransform: 'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoom + ')',
+      markScale: 1 / zoom,
+      isZoomed: zoom > 1,
+      zoomIn: (e) => this.zoomStep(e, 2),
+      zoomOut: (e) => this.zoomStep(e, 0.5),
+      zoomInOff: zoom >= this.MAX_ZOOM,
+      zoomOutOff: zoom <= 1,
+      zoomInColor: zoom >= this.MAX_ZOOM ? '#A5B4B5' : '#14282C',
+      zoomOutColor: zoom <= 1 ? '#A5B4B5' : '#14282C',
+      turnLeft: () => this.snapTo(this.normYaw(s.yaw - 30)),
+      turnRight: () => this.snapTo(this.normYaw(s.yaw + 30)),
+      mapHint: zoom > 1 ? 'Tap the exact spot. Drag to move around.' : 'Tap where you feel it. Drag to turn the body.',
+      mapHintSub: zoom > 1 ? 'Pinch or use the minus button to zoom back out.' : 'Pinch or use the plus button to zoom in on a finger or toe.',
+      bodyFlip: yaw < 0 ? 'scaleX(-1)' : 'none',
+      stageAria: 'Body model. Tap to mark a point. Drag or use the arrow keys to turn the body. Pinch or use plus and minus to zoom.',
+      stageDown: (e) => this.stageDown(e),
+      stageMove: (e) => this.stageMove(e),
+      stageUp: (e) => this.stageUp(e),
+      stageCancel: (e) => this.stageCancel(e),
+      stageKey: (e) => this.stageKey(e),
+      pinButtons: !onMap ? [] : s.selected.map((p, i) => {
+        const q = this.pos(p, yaw);
+        const seen = this.isVisible(p, yaw);
+        return {
+          l: q.l, t: q.t, n: i + 1, hidden: !seen, size: !seen ? '22px' : zoom >= 2 ? '26px' : '32px', font: !seen || zoom >= 2 ? '12px' : '15px', opacity: seen ? 1 : 0.4, events: seen ? 'auto' : 'none',
+          aria: seen ? 'Remove point ' + (i + 1) + ', ' + p.label : 'Point ' + (i + 1) + ', ' + p.label + ', on the far side',
+          // The click that follows a tap lands on the new pin; it must not remove it.
+          remove: () => { if (Date.now() - (this.placedAt || 0) > 400) this.removePin(p.id); }
+        };
+      }),
+      noneSelected: s.selected.length === 0,
+      someSelected: s.selected.length > 0,
+      homeBottom: s.selected.length > 0 ? '0px' : '80px',
+      selectedSummary: this.plural(s.selected.length, 'point') + ' marked · ' + names.join(', '),
+      clearPins: () => this.setState({ selected: [] }),
+      startCompose: () => this.setState({ composing: true, ...this.resetZoom() })
+    };
+  }
+
+  composeVals() {
+    const s = this.state, f = s.form;
+    const noPts = s.selected.length === 0, noCat = f.cats.length === 0;
+    const hint = noPts ? 'Add at least one point on the body to save.' : noCat ? 'Choose at least one symptom or sensation type to save.' : '';
+    const canSave = !noPts && !noCat;
+    return {
+      form: f,
+      formPoints: s.selected.map((p, i) => ({ n: i + 1, label: p.label, aria: 'Remove ' + p.label, remove: () => this.removePin(p.id) })),
+      backToMap: () => this.setState({ composing: false }),
+      formDate: this.fmtDay(s.homeDay),
+      partOfDay: this.partOf(f.time || '12:00'),
+      setTime: this.setForm('time'),
+      setDesc: this.setForm('desc'),
+      setSeverity: this.setForm('severity'),
+      setSevNote: this.setForm('sevNote'),
+      setMedOther: this.setForm('medOther'),
+      setActOther: this.setForm('actOther'),
+      setSenseOther: this.setForm('senseOther'),
+      setConcern: this.setForm('concern'),
+      severityWord: this.sevWord(f.severity),
+      catChips: this.CATS.map((c) => this.chip(c, f.cats.includes(c), this.toggleForm('cats', c))),
+      medChips: this.MEDS.map((c) => this.chip(c, f.meds.includes(c), this.toggleForm('meds', c))),
+      actChips: this.ACTS.map((c) => this.chip(c, f.acts.includes(c), this.toggleForm('acts', c))),
+      senseChips: this.SENSES.map((c) => this.chip(c, f.senses.includes(c), this.toggleForm('senses', c))),
+      saveHintShow: !canSave,
+      saveHint: hint,
+      saveDisabled: !canSave,
+      saveBg: canSave ? '#0B6169' : '#D3DCDC',
+      saveFg: canSave ? '#FFFFFF' : '#4F6368',
+      saveCursor: canSave ? 'pointer' : 'not-allowed',
+      save: () => this.saveReport()
+    };
+  }
+
+  calendarVals() {
+    const s = this.state;
+    const match = (p) => s.area === 'all' || p.area === s.area;
+    const visible = s.reports.map((r) => ({ r: r, pts: r.points.filter(match) })).filter((x) => x.pts.length > 0);
+    const parts = s.calMonth.split('-').map(Number);
+    const first = new Date(parts[0], parts[1] - 1, 1);
+    const daysIn = new Date(parts[0], parts[1], 0).getDate();
+    const cells = [];
+    for (let i = 0; i < first.getDay(); i++) {
+      cells.push({ blank: true, label: '', count: '', aria: 'No date', selected: false, border: '0', bg: 'transparent', fg: '#14282C', weight: 400, cursor: 'default', pick: () => {} });
+    }
+    for (let d = 1; d <= daysIn; d++) {
+      const key = s.calMonth + '-' + String(d).padStart(2, '0');
+      const list = visible.filter((x) => x.r.date === key);
+      const max = list.reduce((m, x) => Math.max(m, x.r.severity), 0);
+      const sel = key === s.calDay;
+      const today = key === this.TODAY;
+      const free = s.symptomFree.includes(key);
+      const bg = free ? '#8EDB8F' : !list.length ? '#FFFFFF' : max <= 3 ? '#D6ECEC' : max <= 6 ? '#86C6C4' : '#0B6169';
+      const fg = list.length && max > 6 ? '#FFFFFF' : '#14282C';
+      cells.push({
+        blank: false, label: d, count: free ? '✓' : list.length ? String(list.length) : '',
+        aria: this.fmtShort(key) + ', ' + (free ? 'no symptoms' : this.plural(list.length, 'report')) + (list.length ? ', highest severity ' + max : '') + (today ? ', today' : ''),
+        selected: sel, border: sel ? '3px solid #B8430F' : today ? '2px solid #14282C' : '1px solid #E4EAEA',
+        bg: bg, fg: fg, weight: today ? 700 : 400, cursor: 'pointer',
+        pick: () => this.setState({ calDay: key })
+      });
+    }
+    const dayFree = s.symptomFree.includes(s.calDay);
+    const custom = this.customShape() && this.shapeVer > 0 && !s.glFailed;
+    const thumbsFresh = custom && this.thumbs && this.thumbs.ver === this.shapeVer;
+    if (custom && !thumbsFresh && s.tab === 'calendar' && !this.thumbPending && typeof setTimeout === 'function') {
+      this.thumbPending = true;
+      setTimeout(() => this.makeThumbs(), 0);
+    }
+    const dayList = visible.filter((x) => x.r.date === s.calDay).sort((a, b) => a.r.time.localeCompare(b.r.time));
+    const dots = (front) => dayList.reduce((a, x) => a.concat(x.pts.filter((p) => (p.n[2] >= 0) === front)), []).map((p) => this.pos(p, front ? 0 : 180));
+    const shiftMonth = (n) => () => {
+      const dt = new Date(parts[0], parts[1] - 1 + n, 1);
+      this.setState({ calMonth: this.iso(dt).slice(0, 7) });
+    };
+    return {
+      areaChips: this.AREAS.map((a) => this.chip(a[1], s.area === a[0], () => this.setState({ area: a[0] }))),
+      monthTitle: first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      monthPrev: shiftMonth(-1),
+      monthNext: shiftMonth(1),
+      weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      calCells: cells,
+      thumbFront: thumbsFresh ? this.thumbs.f : this.FRAMES[0],
+      thumbBack: thumbsFresh ? this.thumbs.b : this.FRAMES[36],
+      calDayTitle: this.fmtDay(s.calDay),
+      calDaySub: dayFree ? 'Marked symptom-free. Tap below to undo.' : dayList.length ? this.plural(dayList.length, 'report') : 'Nothing reported' + (s.area === 'all' ? '' : ' in this area'),
+      calCanMarkFree: s.calDay <= this.TODAY && !s.reports.some((r) => r.date === s.calDay),
+      calDayFree: dayFree,
+      freeBg: dayFree ? '#8EDB8F' : '#FFFFFF',
+      toggleFree: () => this.setState((q) => ({ symptomFree: q.symptomFree.includes(q.calDay) ? q.symptomFree.filter((d) => d !== q.calDay) : q.symptomFree.concat([q.calDay]) })),
+      calDayHas: dayList.length > 0,
+      calFrontDots: dots(true),
+      calBackDots: dots(false),
+      calDayReports: dayList.map((x) => ({
+        time: this.fmtTime(x.r.time), cats: x.r.cats.join(', '), sev: x.r.severity + '/10',
+        where: x.pts.map((p) => p.label).join(', '),
+        open: () => this.setState({ detailId: x.r.id })
+      }))
+    };
+  }
+
+  reportsVals() {
+    const s = this.state;
+    const from = this.addDays(this.TODAY, -(s.range - 1));
+    const inRange = s.reports.filter((r) => r.date >= from && r.date <= this.TODAY);
+    const days = new Set(inRange.map((r) => r.date)).size;
+    const avg = (list) => list.length ? (list.reduce((a, r) => a + r.severity, 0) / list.length).toFixed(1) : '0';
+    const groups = this.CATS.map((c) => ({ cat: c, list: inRange.filter((r) => r.cats.includes(c)) })).filter((g) => g.list.length > 0).sort((a, b) => b.list.length - a.list.length);
+    const top = groups.length ? groups[0].list.length : 1;
+    const active = groups.find((g) => g.cat === s.drillCat) || groups[0];
+    const out = {
+      exportPdf: () => this.flash('PDF export is a placeholder in this draft'),
+      rangeChips: [7, 30, 90].map((n) => this.chip(n + ' days', s.range === n, () => this.setState({ range: n }))),
+      statTiles: [
+        { value: inRange.length, label: 'Reports' },
+        { value: days, label: 'Days with symptoms' },
+        { value: avg(inRange), label: 'Avg severity' }
+      ],
+      catRows: groups.map((g) => {
+        const on = !!active && g.cat === active.cat;
+        return {
+          label: g.cat, count: g.list.length, avg: avg(g.list), on: on, pct: (g.list.length / top * 100) + '%',
+          rowBg: on ? '#E6F2F2' : 'transparent', barColor: '#0B6169',
+          pick: () => this.setState({ drillCat: g.cat })
+        };
+      }),
+      noCats: groups.length === 0,
+      hasDrill: !!active,
+      drillTitle: '', drillSub: '', trendAria: '', trendBars: [], trendStart: '', trendEnd: '', whereRows: [], whenRows: [], contextTags: [], noContext: false
+    };
+    if (!active) return out;
+    const list = active.list;
+    const size = s.range === 7 ? 1 : 7;
+    const n = Math.ceil(s.range / size);
+    const buckets = [];
+    for (let i = 0; i < n; i++) {
+      const end = this.addDays(this.TODAY, -(n - 1 - i) * size);
+      const startRaw = this.addDays(end, -(size - 1));
+      const start = startRaw < from ? from : startRaw;
+      buckets.push({ start: start, end: end, n: list.filter((r) => r.date >= start && r.date <= end).length });
+    }
+    const maxB = Math.max(1, ...buckets.map((b) => b.n));
+    const tally = (arr) => {
+      const m = {};
+      arr.forEach((v) => { m[v] = (m[v] || 0) + 1; });
+      return Object.keys(m).map((k) => ({ label: k, count: m[k] })).sort((a, b) => b.count - a.count);
+    };
+    const where = tally(list.reduce((a, r) => a.concat(r.points.map((p) => p.label)), [])).slice(0, 5);
+    const maxW = where.length ? where[0].count : 1;
+    const parts = ['Morning', 'Afternoon', 'Evening', 'Night'].map((p) => ({ label: p, count: list.filter((r) => this.partOf(r.time) === p).length }));
+    const maxP = Math.max(1, ...parts.map((p) => p.count));
+    const ctx = tally(list.reduce((a, r) => a.concat(r.meds, r.acts, r.senses), [])).slice(0, 8);
+    out.drillTitle = active.cat;
+    out.drillSub = this.plural(list.length, 'report') + ' in the last ' + s.range + ' days';
+    out.trendAria = active.cat + ' reports per ' + (size === 1 ? 'day' : 'week') + ': ' + buckets.map((b) => b.n).join(', ');
+    out.trendBars = buckets.map((b) => ({ n: b.n ? b.n : '', h: (b.n ? Math.max(4, b.n / maxB * 56) : 0) + 'px', tip: this.fmtShort(b.start) + (size > 1 ? ' to ' + this.fmtShort(b.end) : '') + ': ' + b.n }));
+    out.trendStart = this.fmtShort(buckets[0].start);
+    out.trendEnd = this.fmtShort(buckets[buckets.length - 1].end);
+    out.whereRows = where.map((w) => ({ label: w.label, count: w.count, pct: (w.count / maxW * 100) + '%' }));
+    out.whenRows = parts.map((p) => ({ label: p.label, count: p.count, pct: (p.count / maxP * 100) + '%' }));
+    out.contextTags = ctx.map((c) => c.label + ' · ' + c.count);
+    out.noContext = ctx.length === 0;
+    return out;
+  }
+
+  detailVals() {
+    const s = this.state;
+    const r = s.reports.find((q) => q.id === s.detailId);
+    if (!r) return { hasDetail: false, detail: { cats: '', when: '', rows: [] }, closeDetail: () => {} };
+    const rows = [
+      { k: 'Where', v: r.points.map((p) => p.label).join(', ') },
+      { k: 'Severity', v: r.severity + ' out of 10 · ' + this.sevWord(r.severity) + (r.sevNote ? '. ' + r.sevNote : '') }
+    ];
+    const add = (k, v) => { if (v && v.length) rows.push({ k: k, v: Array.isArray(v) ? v.join(', ') : v }); };
+    add('Description', r.desc);
+    add('Medicines taken', r.meds);
+    add('Physical activity', r.acts);
+    add('Other sensations', r.senses);
+    add('Concerns', r.concern);
+    return {
+      hasDetail: true,
+      detail: { cats: r.cats.join(', '), when: this.fmtDay(r.date) + ' at ' + this.fmtTime(r.time), rows: rows },
+      closeDetail: () => this.setState({ detailId: null })
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const nav = (id) => ({
+      current: s.tab === id ? 'page' : undefined,
+      weight: s.tab === id ? 700 : 400,
+      pill: s.tab === id ? '#D6ECEC' : 'transparent',
+      pick: () => this.setState({ tab: id, ...this.resetZoom() })
+    });
+    return {
+      phoneH: Number(this.props.phoneH) || 844,
+      figH: this.figSize().h,
+      figW: this.figSize().w,
+      isHome: s.tab === 'home' && !s.composing,
+      isCalendar: s.tab === 'calendar' && !s.composing,
+      isReports: s.tab === 'reports' && !s.composing,
+      isSettings: s.tab === 'settings' && !s.composing,
+      composing: s.composing,
+      showNav: !s.composing && !(s.tab === 'home' && s.selected.length > 0),
+      navHome: nav('home'),
+      navCal: nav('calendar'),
+      navRep: nav('reports'),
+      navSet: nav('settings'),
+      showSplash: s.splash !== 'off',
+      splashUrl: this.SPLASH_URL,
+      splashOpacity: s.splash === 'out' ? 0 : 1,
+      splashImgOpacity: s.splashImg ? 1 : 0,
+      splashInMs: this.calmMotion() ? 0 : this.SPLASH_IN,
+      splashFadeMs: this.calmMotion() ? 0 : this.SPLASH_FADE,
+      splashLoaded: () => this.splashLoaded(),
+      skipSplash: () => this.splashOut(),
+      hasToast: !!s.toast,
+      toast: s.toast,
+      ...this.homeVals(),
+      ...this.composeVals(),
+      ...this.calendarVals(),
+      ...this.reportsVals(),
+      ...this.settingsVals(),
+      ...this.detailVals()
+    };
+  }
+}
+
+startApp(Component);
+</script>
+</body>
+</html>

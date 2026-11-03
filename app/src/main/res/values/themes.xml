@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launch starts dark to match the opening image; MainActivity lightens the bars as it fades to the app. -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/splash</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowSplashScreenBackground">@color/splash</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>
+    </style>
+    <color name="ground">#F3F6F6</color>
+    <color name="splash">#121622</color>
+    <color name="logoGround">#12202A</color>
+    <color name="primary">#0B6169</color>
+</resources>
