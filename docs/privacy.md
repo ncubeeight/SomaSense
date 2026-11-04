@@ -26,11 +26,11 @@ Nothing. The app has no accounts, advertising, analytics or crash reporting. It 
 
 ## When you share your log
 
-The Share button on the Calendar sends a month’s log only when you choose to. You pick the app and the recipient in Android’s share sheet. What you send includes a calendar picture, a PDF and a text list of that month’s entries.
+The Share buttons on the Calendar and Reports tabs send your information only when you choose to. You pick the app and the recipient in Android’s share sheet. A Calendar share includes a calendar picture, a PDF and a text list of that month’s entries. A Reports share includes a PDF and a text summary for the period you selected.
 
 Once shared, the information is handled by the app and the people you sent it to, under their own privacy practices. Sending it by email or chat also means it travels over the internet through those services. SomaSense can’t recall anything you’ve already shared.
 
-To prepare a share, the app keeps a temporary copy of the files on your phone until your next share or until you delete your data.
+To prepare a share, the app keeps a temporary copy of the files on your phone until your next share or until you delete your data. Save to Files puts a PDF in the location you choose, where it stays until you remove it. Delete stored on-device data doesn’t remove PDFs you saved this way.
 
 ## Backups and new phones
 

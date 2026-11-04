@@ -16,6 +16,7 @@ import android.util.Base64;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
+import android.widget.Toast;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -29,7 +30,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -39,6 +42,8 @@ public class MainActivity extends Activity {
     private static final int SPLASH_COLOR = Color.parseColor("#121622");
     private static final int GROUND_COLOR = Color.parseColor("#F3F6F6");
     private static final long SPLASH_FADE_MS = 1000;
+    private static final int SAVE_PDF = 1;
+    private File pendingSave;
     private WebView web;
     private FrameLayout frame;
     private boolean splashEnded;
@@ -146,19 +151,44 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public boolean sharePdf(String subject, String body, String baseName, String pdfBase64) {
+            clearShareFiles();
+            File pdf = shareFile(new File(baseName).getName() + ".pdf", pdfBase64);
+            if (pdf == null) return false;
+            Uri uri = shareUri(pdf);
+            Intent send = new Intent(Intent.ACTION_SEND)
+                    .setType("application/pdf")
+                    .putExtra(Intent.EXTRA_SUBJECT, subject)
+                    .putExtra(Intent.EXTRA_TEXT, body)
+                    .putExtra(Intent.EXTRA_STREAM, uri)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            send.setClipData(ClipData.newRawUri(pdf.getName(), uri));
+            runOnUiThread(() -> startActivity(Intent.createChooser(send, subject)));
+            return true;
+        }
+
+        /** Opens Android's file picker; the PDF is written once the person chooses where it goes. */
+        @JavascriptInterface
+        public boolean savePdf(String baseName, String pdfBase64) {
+            clearShareFiles();
+            File pdf = shareFile(new File(baseName).getName() + ".pdf", pdfBase64);
+            if (pdf == null) return false;
+            pendingSave = pdf;
+            Intent save = new Intent(Intent.ACTION_CREATE_DOCUMENT)
+                    .addCategory(Intent.CATEGORY_OPENABLE)
+                    .setType("application/pdf")
+                    .putExtra(Intent.EXTRA_TITLE, pdf.getName());
+            runOnUiThread(() -> startActivityForResult(save, SAVE_PDF));
+            return true;
+        }
+
+        @JavascriptInterface
         public boolean shareLog(String subject, String body, String baseName, String calendarBase64, String pdfBase64) {
             clearShareFiles();
-            File dir = new File(getCacheDir(), ShareProvider.DIR);
-            dir.mkdirs();
             String name = new File(baseName).getName();
-            File picture = new File(dir, name + "-calendar.png");
-            File pdf = new File(dir, name + ".pdf");
-            try (FileOutputStream a = new FileOutputStream(picture); FileOutputStream b = new FileOutputStream(pdf)) {
-                a.write(Base64.decode(calendarBase64, Base64.DEFAULT));
-                b.write(Base64.decode(pdfBase64, Base64.DEFAULT));
-            } catch (IOException e) {
-                return false;
-            }
+            File picture = shareFile(name + "-calendar.png", calendarBase64);
+            File pdf = shareFile(name + ".pdf", pdfBase64);
+            if (picture == null || pdf == null) return false;
             ArrayList<Uri> uris = new ArrayList<>();
             uris.add(shareUri(picture));
             uris.add(shareUri(pdf));
@@ -174,6 +204,39 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> startActivity(Intent.createChooser(send, subject)));
             return true;
         }
+    }
+
+    private File shareFile(String name, String base64) {
+        File dir = new File(getCacheDir(), ShareProvider.DIR);
+        dir.mkdirs();
+        File file = new File(dir, name);
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(Base64.decode(base64, Base64.DEFAULT));
+            return file;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != SAVE_PDF || pendingSave == null) return;
+        File pdf = pendingSave;
+        pendingSave = null;
+        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+            boolean saved = false;
+            try (OutputStream out = getContentResolver().openOutputStream(data.getData())) {
+                if (out != null) {
+                    Files.copy(pdf.toPath(), out);
+                    saved = true;
+                }
+            } catch (IOException e) {
+                saved = false;
+            }
+            Toast.makeText(this, saved ? "PDF saved" : "The PDF could not be saved", Toast.LENGTH_LONG).show();
+        }
+        pdf.delete();
     }
 
     private Uri shareUri(File file) {

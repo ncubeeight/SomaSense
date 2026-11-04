@@ -346,10 +346,10 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 <sc-if value="{{composing}}" hint-placeholder-val="{{false}}">
 <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #F3F6F6; display: flex; flex-direction: column">
   <div style="flex: none; height: 60px; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: #FFFFFF; border-bottom: 1px solid #D3DCDC">
-    <button type="button" aria-label="Back to body map" onClick="{{backToMap}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
+    <button type="button" aria-label="{{formBackLabel}}" onClick="{{formBack}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
     </button>
-    <h1 style="margin: 0; font-size: 20px">New report</h1>
+    <h1 style="margin: 0; font-size: 20px">{{formTitle}}</h1>
   </div>
   <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px">
 
@@ -445,7 +445,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     <sc-if value="{{saveHintShow}}" hint-placeholder-val="{{false}}">
       <div style="font-size: 13px; color: #4F6368; margin-bottom: 6px">{{saveHint}}</div>
     </sc-if>
-    <button type="button" disabled="{{saveDisabled}}" onClick="{{save}}" style="width: 100%; height: 52px; border: 0; border-radius: 26px; background: {{saveBg}}; color: {{saveFg}}; font: inherit; font-weight: 700; cursor: {{saveCursor}}">Save report</button>
+    <button type="button" disabled="{{saveDisabled}}" onClick="{{save}}" style="width: 100%; height: 52px; border: 0; border-radius: 26px; background: {{saveBg}}; color: {{saveFg}}; font: inherit; font-weight: 700; cursor: {{saveCursor}}">{{saveLabel}}</button>
   </div>
 </div>
 </sc-if>
@@ -458,6 +458,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
         <h2 style="margin: 0; font-size: 20px">{{detail.cats}}</h2>
         <div style="font-size: 14px; color: #4F6368">{{detail.when}}</div>
       </div>
+      <button type="button" aria-label="Edit report" onClick="{{editReport}}" style="flex: none; width: 44px; height: 44px; margin-left: auto; border: 0; background: transparent; color: #0B6169; cursor: pointer; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"></path><path d="M13.5 6.5l4 4"></path></svg>
+      </button>
       <button type="button" aria-label="Close report details" onClick="{{closeDetail}}" style="flex: none; width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
       </button>
@@ -491,9 +494,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     <h3 style="margin: 16px 0 6px; font-size: 16px">What ncubeeight LLC collects</h3>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Nothing. The app has no accounts, advertising, analytics or crash reporting. It doesn’t have Android’s internet permission and requests no other permissions, so it can’t reach the internet or read your location, camera, microphone, contacts or files. ncubeeight LLC has no copy of your log and can’t see, recover or delete it for you.</p>
     <h3 style="margin: 16px 0 6px; font-size: 16px">When you share your log</h3>
-    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">The Share button on the Calendar sends a month’s log only when you choose to. You pick the app and the recipient in Android’s share sheet. What you send includes a calendar picture, a PDF and a text list of that month’s entries.</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">The Share buttons on the Calendar and Reports tabs send your information only when you choose to. You pick the app and the recipient in Android’s share sheet. A Calendar share includes a calendar picture, a PDF and a text list of that month’s entries. A Reports share includes a PDF and a text summary for the period you selected.</p>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Once shared, the information is handled by the app and the people you sent it to, under their own privacy practices. Sending it by email or chat also means it travels over the internet through those services. SomaSense can’t recall anything you’ve already shared.</p>
-    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">To prepare a share, the app keeps a temporary copy of the files on your phone until your next share or until you delete your data.</p>
+    <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">To prepare a share, the app keeps a temporary copy of the files on your phone until your next share or until you delete your data. Save to Files puts a PDF in the location you choose, where it stays until you remove it. Delete stored on-device data doesn’t remove PDFs you saved this way.</p>
     <h3 style="margin: 16px 0 6px; font-size: 16px">Backups and new phones</h3>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense opts out of Android’s cloud backup and device transfer, so your log isn’t copied to your Google account and won’t move to a new phone. To keep a copy, share your log before changing phones.</p>
     <h3 style="margin: 16px 0 6px; font-size: 16px">Keeping and deleting your data</h3>
@@ -515,21 +518,24 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 </sc-if>
 
 <sc-if value="{{hasShare}}" hint-placeholder-val="{{false}}">
-<div role="dialog" aria-label="Share this month's log" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 4; background: #F3F6F6; display: flex; flex-direction: column">
+<div role="dialog" aria-label="{{shareHeading}}" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 4; background: #F3F6F6; display: flex; flex-direction: column">
   <div style="flex: none; display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: #FFFFFF; border-bottom: 1px solid #D3DCDC">
     <button type="button" aria-label="Close" onClick="{{closeShare}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #14282C; cursor: pointer; display: flex; align-items: center; justify-content: center">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
     </button>
-    <h2 style="margin: 0; font-size: 18px">Share this month’s log</h2>
+    <h2 style="margin: 0; font-size: 18px">{{shareHeading}}</h2>
   </div>
   <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px">
     <sc-for list="{{sharePreviewPages}}" as="pg" hint-placeholder-count="1">
-      <img src="{{pg}}" alt="Page of the shared log: a calendar of the month colored by severity, then the entries" style="display: block; width: 100%; height: auto; flex: none; border: 1px solid #D3DCDC; border-radius: 4px; box-sizing: border-box">
+      <img src="{{pg}}" alt="Preview of a page in the PDF" style="display: block; width: 100%; height: auto; flex: none; border: 1px solid #D3DCDC; border-radius: 4px; box-sizing: border-box">
     </sc-for>
   </div>
   <div style="flex: none; padding: 12px 16px; background: #FFFFFF; border-top: 1px solid #D3DCDC">
-    <div style="font-size: 13px; color: #4F6368; margin-bottom: 8px">This sends everything logged this month. You choose the app and the recipient next.</div>
-    <button type="button" onClick="{{sendShare}}" style="width: 100%; height: 52px; border: 0; border-radius: 26px; background: #0B6169; color: #FFFFFF; font: inherit; font-weight: 700; cursor: pointer">Share</button>
+    <div style="font-size: 13px; color: #4F6368; margin-bottom: 8px">{{shareNote}}</div>
+    <div style="display: flex; gap: 8px">
+      <button type="button" onClick="{{saveShare}}" style="flex: 1; height: 52px; border: 1px solid #0B6169; border-radius: 26px; background: #FFFFFF; color: #0B6169; font: inherit; font-weight: 700; cursor: pointer">Save to Files</button>
+      <button type="button" onClick="{{sendShare}}" style="flex: 1; height: 52px; border: 0; border-radius: 26px; background: #0B6169; color: #FFFFFF; font: inherit; font-weight: 700; cursor: pointer">Share</button>
+    </div>
   </div>
 </div>
 </sc-if>
@@ -600,6 +606,7 @@ class Component extends DCLogic {
       form: form,
       reports: this.live ? saved.reports : this.seedReports(),
       deleteArmed: false,
+      editing: null,
       wipeArmed: false,
       privacy: false,
       share: null,
@@ -1089,9 +1096,11 @@ class Component extends DCLogic {
     if (s.privacy) { this.setState({ privacy: false }); return true; }
     if (s.share) { this.setState({ share: null }); return true; }
     if (s.detailId) { this.setState({ detailId: null, deleteArmed: false }); return true; }
+    if (s.editing && (s.composing || !s.selected.length)) { this.setState({ ...this.endEdit(), detailId: s.editing.id }); return true; }
     if (s.composing) { this.setState({ composing: false }); return true; }
     if (s.tab !== 'home') { this.setState({ tab: 'home' }); return true; }
     if (s.zoom > 1) { this.setState(this.resetZoom()); return true; }
+    if (s.editing) { this.setState({ ...this.endEdit(), detailId: s.editing.id }); return true; }
     if (s.selected.length) { this.setState({ selected: [] }); return true; }
     return false;
   }
@@ -1411,12 +1420,43 @@ class Component extends DCLogic {
     }
     this.setBody({ g: 0, b: 0 });
     try { localStorage.clear(); } catch (e) { /* nothing was stored */ }
-    this.setState({ wipeArmed: false, reports: [], symptomFree: [], selected: [], form: this.blankForm(), composing: false, detailId: null, deleteArmed: false, share: null });
+    this.setState({ wipeArmed: false, reports: [], symptomFree: [], selected: [], form: this.blankForm(), composing: false, detailId: null, deleteArmed: false, share: null, editing: null });
     this.flash('All stored data was deleted');
   }
   removePin(id) { this.setState((s) => ({ selected: s.selected.filter((p) => p.id !== id) })); }
 
+  startEdit(r) {
+    const s = this.state;
+    const split = (list, known) => ({ chosen: list.filter((v) => known.includes(v)), other: list.filter((v) => !known.includes(v)).join(', ') });
+    const meds = split(r.meds, this.MEDS), acts = split(r.acts, this.ACTS), senses = split(r.senses, this.SENSES);
+    this.setState({
+      editing: { id: r.id, date: r.date, tab: s.tab, homeDay: s.homeDay, draft: s.form },
+      detailId: null, deleteArmed: false, composing: true, tab: 'home', homeDay: r.date, selected: r.points.slice(), ...this.resetZoom(),
+      form: {
+        time: r.time, cats: r.cats.slice(), desc: r.desc, severity: r.severity, sevNote: r.sevNote,
+        meds: meds.chosen, medOther: meds.other, acts: acts.chosen, actOther: acts.other, senses: senses.chosen, senseOther: senses.other, concern: r.concern
+      }
+    });
+  }
+  // Leaving an edit puts back the screen it started from and any draft that was in progress.
+  endEdit() {
+    const e = this.state.editing;
+    return { editing: null, selected: [], form: e.draft, composing: false, tab: e.tab, homeDay: e.homeDay, ...this.resetZoom() };
+  }
+  saveEdit() {
+    const s = this.state, f = s.form, e = s.editing;
+    const extra = (list, other) => other.trim() ? list.concat([other.trim()]) : list;
+    const reports = s.reports.map((r) => r.id !== e.id ? r : {
+      ...r, time: f.time, cats: f.cats, severity: Number(f.severity), points: s.selected, desc: f.desc, sevNote: f.sevNote,
+      meds: extra(f.meds, f.medOther), acts: extra(f.acts, f.actOther), senses: extra(f.senses, f.senseOther), concern: f.concern
+    });
+    this.saveData(reports, s.symptomFree);
+    this.setState({ reports: reports, ...this.endEdit(), detailId: e.id });
+    this.flash('Report updated');
+  }
+
   saveReport() {
+    if (this.state.editing) { this.saveEdit(); return; }
     const s = this.state, f = s.form;
     const extra = (list, other) => other.trim() ? list.concat([other.trim()]) : list;
     const rep = {
@@ -1448,8 +1488,8 @@ class Component extends DCLogic {
       homeSub: (s.homeDay === this.TODAY ? this.fmtDay(s.homeDay) + ' · ' : '') + this.plural(dayReports.length, 'report'),
       isToday: s.homeDay === this.TODAY,
       nextColor: s.homeDay === this.TODAY ? '#A5B4B5' : '#14282C',
-      dayPrev: () => this.setState((q) => ({ homeDay: this.addDays(q.homeDay, -1) })),
-      dayNext: () => this.setState((q) => ({ homeDay: q.homeDay === this.TODAY ? q.homeDay : this.addDays(q.homeDay, 1) })),
+      dayPrev: () => this.setState((q) => (q.editing ? null : { homeDay: this.addDays(q.homeDay, -1) })),
+      dayNext: () => this.setState((q) => (q.editing ? null : { homeDay: q.homeDay === this.TODAY ? q.homeDay : this.addDays(q.homeDay, 1) })),
       viewChips: views.map((v) => {
         const on = Math.abs(this.normYaw(s.yaw - v[1])) <= 22.5;
         return { label: v[0], on: on, pick: () => this.snapTo(v[1]), bg: on ? '#0B6169' : 'transparent', fg: on ? '#FFFFFF' : '#14282C' };
@@ -1494,10 +1534,10 @@ class Component extends DCLogic {
       someSelected: s.selected.length > 0,
       homeBottom: s.selected.length > 0 ? '0px' : '80px',
       selectedSummary: this.plural(s.selected.length, 'point') + ' marked · ' + names.join(', '),
-      clearPins: () => this.setState({ selected: [] }),
+      clearPins: () => this.setState(s.editing ? { ...this.endEdit(), detailId: s.editing.id } : { selected: [] }),
       startCompose: () => {
         const f = this.state.form;
-        const time = this.live && f.time === this.formDefault ? (this.formDefault = this.nowTime()) : f.time;
+        const time = this.live && !this.state.editing && f.time === this.formDefault ? (this.formDefault = this.nowTime()) : f.time;
         this.setState({ composing: true, form: { ...f, time: time }, ...this.resetZoom() });
       }
     };
@@ -1512,6 +1552,10 @@ class Component extends DCLogic {
       form: f,
       formPoints: s.selected.map((p, i) => ({ n: i + 1, label: p.label, aria: 'Remove ' + p.label, remove: () => this.removePin(p.id) })),
       backToMap: () => this.setState({ composing: false }),
+      formBack: () => this.setState(s.editing ? { ...this.endEdit(), detailId: s.editing.id } : { composing: false }),
+      formBackLabel: s.editing ? 'Cancel editing' : 'Back to body map',
+      formTitle: s.editing ? 'Edit report' : 'New report',
+      saveLabel: s.editing ? 'Save changes' : 'Save report',
       formDate: this.fmtDay(s.homeDay),
       partOfDay: this.partOf(f.time || '12:00'),
       setTime: this.setForm('time'),
@@ -1609,17 +1653,46 @@ class Component extends DCLogic {
     };
   }
 
+  reportData(range) {
+    const s = this.state;
+    const from = this.addDays(this.TODAY, -(range - 1));
+    const inRange = s.reports.filter((r) => r.date >= from && r.date <= this.TODAY);
+    const mean = (list) => list.length ? (list.reduce((a, r) => a + r.severity, 0) / list.length).toFixed(1) : '0';
+    const groups = this.CATS.map((c) => ({ cat: c, list: inRange.filter((r) => r.cats.includes(c)) })).filter((g) => g.list.length > 0).sort((a, b) => b.list.length - a.list.length);
+    const freeDays = s.symptomFree.filter((d) => d >= from && d <= this.TODAY && !inRange.some((r) => r.date === d)).length;
+    return { from, inRange, days: new Set(inRange.map((r) => r.date)).size, freeDays, mean, avg: mean(inRange), groups };
+  }
+  typeDetail(list, range, from) {
+    const size = range === 7 ? 1 : 7;
+    const n = Math.ceil(range / size);
+    const buckets = [];
+    for (let i = 0; i < n; i++) {
+      const end = this.addDays(this.TODAY, -(n - 1 - i) * size);
+      const startRaw = this.addDays(end, -(size - 1));
+      const start = startRaw < from ? from : startRaw;
+      buckets.push({ start: start, end: end, n: list.filter((r) => r.date >= start && r.date <= end).length });
+    }
+    const tally = (arr) => {
+      const m = {};
+      arr.forEach((v) => { m[v] = (m[v] || 0) + 1; });
+      return Object.keys(m).map((k) => ({ label: k, count: m[k] })).sort((a, b) => b.count - a.count);
+    };
+    const parts = ['Morning', 'Afternoon', 'Evening', 'Night'].map((p) => ({ label: p, count: list.filter((r) => this.partOf(r.time) === p).length }));
+    return {
+      size, buckets, parts,
+      maxB: Math.max(1, ...buckets.map((b) => b.n)),
+      maxP: Math.max(1, ...parts.map((p) => p.count)),
+      where: tally(list.reduce((a, r) => a.concat(r.points.map((p) => p.label)), [])).slice(0, 5),
+      ctx: tally(list.reduce((a, r) => a.concat(r.meds, r.acts, r.senses), [])).slice(0, 8)
+    };
+  }
   reportsVals() {
     const s = this.state;
-    const from = this.addDays(this.TODAY, -(s.range - 1));
-    const inRange = s.reports.filter((r) => r.date >= from && r.date <= this.TODAY);
-    const days = new Set(inRange.map((r) => r.date)).size;
-    const avg = (list) => list.length ? (list.reduce((a, r) => a + r.severity, 0) / list.length).toFixed(1) : '0';
-    const groups = this.CATS.map((c) => ({ cat: c, list: inRange.filter((r) => r.cats.includes(c)) })).filter((g) => g.list.length > 0).sort((a, b) => b.list.length - a.list.length);
+    const { from, inRange, days, mean: avg, groups } = this.reportData(s.range);
     const top = groups.length ? groups[0].list.length : 1;
     const active = groups.find((g) => g.cat === s.drillCat) || groups[0];
     const out = {
-      exportPdf: () => this.flash('PDF export is a placeholder in this draft'),
+      exportPdf: () => this.openReportShare(),
       rangeChips: [7, 30, 90].map((n) => this.chip(n + ' days', s.range === n, () => this.setState({ range: n }))),
       statTiles: [
         { value: inRange.length, label: 'Reports' },
@@ -1640,26 +1713,8 @@ class Component extends DCLogic {
     };
     if (!active) return out;
     const list = active.list;
-    const size = s.range === 7 ? 1 : 7;
-    const n = Math.ceil(s.range / size);
-    const buckets = [];
-    for (let i = 0; i < n; i++) {
-      const end = this.addDays(this.TODAY, -(n - 1 - i) * size);
-      const startRaw = this.addDays(end, -(size - 1));
-      const start = startRaw < from ? from : startRaw;
-      buckets.push({ start: start, end: end, n: list.filter((r) => r.date >= start && r.date <= end).length });
-    }
-    const maxB = Math.max(1, ...buckets.map((b) => b.n));
-    const tally = (arr) => {
-      const m = {};
-      arr.forEach((v) => { m[v] = (m[v] || 0) + 1; });
-      return Object.keys(m).map((k) => ({ label: k, count: m[k] })).sort((a, b) => b.count - a.count);
-    };
-    const where = tally(list.reduce((a, r) => a.concat(r.points.map((p) => p.label)), [])).slice(0, 5);
+    const { size, buckets, maxB, where, parts, maxP, ctx } = this.typeDetail(list, s.range, from);
     const maxW = where.length ? where[0].count : 1;
-    const parts = ['Morning', 'Afternoon', 'Evening', 'Night'].map((p) => ({ label: p, count: list.filter((r) => this.partOf(r.time) === p).length }));
-    const maxP = Math.max(1, ...parts.map((p) => p.count));
-    const ctx = tally(list.reduce((a, r) => a.concat(r.meds, r.acts, r.senses), [])).slice(0, 8);
     out.drillTitle = active.cat;
     out.drillSub = this.plural(list.length, 'report') + ' in the last ' + s.range + ' days';
     out.trendAria = active.cat + ' reports per ' + (size === 1 ? 'day' : 'week') + ': ' + buckets.map((b) => b.n).join(', ');
@@ -1676,12 +1731,13 @@ class Component extends DCLogic {
   detailVals() {
     const s = this.state;
     const r = s.reports.find((q) => q.id === s.detailId);
-    if (!r) return { hasDetail: false, detail: { cats: '', when: '', rows: [] }, closeDetail: () => {} };
+    if (!r) return { hasDetail: false, detail: { cats: '', when: '', rows: [] }, closeDetail: () => {}, editReport: () => {} };
     const armed = s.deleteArmed;
     return {
       hasDetail: true,
       detail: { cats: r.cats.join(', '), when: this.fmtDay(r.date) + ' at ' + this.fmtTime(r.time), rows: this.reportRows(r) },
       closeDetail: () => this.setState({ detailId: null, deleteArmed: false }),
+      editReport: () => this.startEdit(r),
       deleteLabel: armed ? 'Tap again to delete for good' : 'Delete report',
       deleteBg: armed ? '#B8430F' : '#FFFFFF',
       deleteFg: armed ? '#FFFFFF' : '#B8430F',
@@ -1721,7 +1777,7 @@ class Component extends DCLogic {
     const days = new Set(reports.map((x) => x.date)).size, free = list.length - reports.length;
     return this.plural(reports.length, 'report') + ' on ' + this.plural(days, 'day') + ' · ' + this.plural(free, 'symptom-free day');
   }
-  sharePages(month) {
+  pdfTools() {
     const W = 1224, H = 1584, M = 84, BOTTOM = H - 110;
     const font = (w, px) => w + ' ' + px + 'px "Atkinson Hyperlegible", system-ui, sans-serif';
     const INK = '#14282C', SOFT = '#4F6368', LINE = '#D3DCDC';
@@ -1747,6 +1803,136 @@ class Component extends DCLogic {
       });
       return out;
     };
+    const text = (c, str, x, y, f, color) => { c.font = f; c.fillStyle = color; c.fillText(str, x, y); };
+    return { W, H, M, BOTTOM, font, wrap, text, INK, SOFT, LINE };
+  }
+  renderPages(blocks) {
+    const { W, H, M, BOTTOM, font, text, SOFT } = this.pdfTools();
+    // Lay the blocks out on letter-size pages; headings stay with what follows them.
+    const layout = [[]];
+    let y = M;
+    blocks.forEach((b, i) => {
+      let need = b.h;
+      for (let k = i; blocks[k] && blocks[k].keep && blocks[k + 1]; k++) need += blocks[k + 1].h;
+      if (y + need > BOTTOM && layout[layout.length - 1].length) { layout.push([]); y = M; }
+      layout[layout.length - 1].push({ b: b, y: y });
+      y += b.h;
+    });
+    return layout.map((items, n) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const c = canvas.getContext('2d');
+      c.fillStyle = '#FFFFFF';
+      c.fillRect(0, 0, W, H);
+      items.forEach((it) => it.b.draw(c, it.y));
+      text(c, 'Self-reported log created with SomaSense. Not a medical record or diagnosis.', M, H - 56, font(400, 20), SOFT);
+      c.font = font(400, 20);
+      const page = 'Page ' + (n + 1) + ' of ' + layout.length;
+      text(c, page, W - M - c.measureText(page).width, H - 56, font(400, 20), SOFT);
+      return canvas.toDataURL('image/jpeg', 0.9);
+    });
+  }
+  reportPages(range) {
+    const { W, M, font, wrap, text, INK, SOFT, LINE } = this.pdfTools();
+    const data = this.reportData(range);
+    const blocks = [];
+    const block = (h, draw, keep) => blocks.push({ h: h, draw: draw, keep: !!keep });
+    const FILL = '#0B6169', TRACK = '#E4EAEA', WIDTH = W - 2 * M;
+    const bar = (c, y, pct) => {
+      c.fillStyle = TRACK;
+      c.beginPath();
+      c.roundRect(M, y, WIDTH, 12, 4);
+      c.fill();
+      if (!pct) return;
+      c.fillStyle = FILL;
+      c.beginPath();
+      c.roundRect(M, y, Math.max(8, WIDTH * pct), 12, 4);
+      c.fill();
+    };
+    const row = (c, y, left, right, pct, f) => {
+      text(c, left, M, y + 26, f, INK);
+      c.font = font(400, 24);
+      text(c, right, W - M - c.measureText(right).width, y + 26, font(400, 24), INK);
+      bar(c, y + 38, pct);
+    };
+
+    block(150, (c, y) => {
+      text(c, 'SomaSense', M, y + 52, font(700, 52), INK);
+      text(c, 'Frequency report · Last ' + range + ' days', M, y + 100, font(400, 32), INK);
+      text(c, this.fmtShort(data.from) + ' to ' + this.fmtShort(this.TODAY) + ', ' + this.TODAY.slice(0, 4), M, y + 140, font(400, 26), SOFT);
+    });
+    const tiles = [[data.inRange.length, 'Reports'], [data.days, 'Days with symptoms'], [data.freeDays, 'Symptom-free days'], [data.avg, 'Avg severity']];
+    block(140, (c, y) => {
+      const gap = 16, w = (WIDTH - 3 * gap) / 4;
+      tiles.forEach((t, i) => {
+        const x = M + i * (w + gap);
+        c.strokeStyle = LINE;
+        c.lineWidth = 2;
+        c.beginPath();
+        c.roundRect(x, y + 8, w, 108, 12);
+        c.stroke();
+        text(c, String(t[0]), x + 16, y + 62, font(700, 42), INK);
+        text(c, t[1], x + 16, y + 98, font(400, 20), SOFT);
+      });
+    });
+    block(92, (c, y) => {
+      text(c, 'How often, by type', M, y + 40, font(700, 36), INK);
+      text(c, 'A report with two types counts once in each.', M, y + 76, font(400, 23), SOFT);
+    }, true);
+    const top = data.groups[0].list.length;
+    data.groups.forEach((g) => {
+      block(66, (c, y) => row(c, y, g.cat, this.plural(g.list.length, 'report') + ' · avg severity ' + data.mean(g.list), g.list.length / top, font(700, 26)));
+    });
+
+    data.groups.forEach((g) => {
+      const d = this.typeDetail(g.list, range, data.from);
+      block(26, () => {}, true);
+      block(12, (c, y) => { c.fillStyle = LINE; c.fillRect(M, y + 4, WIDTH, 2); }, true);
+      block(92, (c, y) => {
+        text(c, g.cat, M, y + 46, font(700, 36), INK);
+        text(c, this.plural(g.list.length, 'report') + ' in the last ' + range + ' days', M, y + 82, font(400, 24), SOFT);
+      }, true);
+      block(44, (c, y) => text(c, 'Over time (reports per ' + (d.size === 1 ? 'day' : 'week') + ')', M, y + 32, font(700, 25), INK), true);
+      block(170, (c, y) => {
+        const base = y + 124, gap = 8, w = (WIDTH - (d.buckets.length - 1) * gap) / d.buckets.length;
+        c.textAlign = 'center';
+        d.buckets.forEach((b, i) => {
+          if (!b.n) return;
+          const x = M + i * (w + gap), h = Math.max(8, b.n / d.maxB * 90);
+          c.fillStyle = FILL;
+          c.beginPath();
+          c.roundRect(x, base - h, w, h, [4, 4, 0, 0]);
+          c.fill();
+          text(c, String(b.n), x + w / 2, base - h - 6, font(400, 22), INK);
+        });
+        c.textAlign = 'left';
+        c.fillStyle = '#C4D0D0';
+        c.fillRect(M, base, WIDTH, 2);
+        const start = this.fmtShort(d.buckets[0].start), end = this.fmtShort(d.buckets[d.buckets.length - 1].end);
+        text(c, start, M, base + 30, font(400, 21), SOFT);
+        c.font = font(400, 21);
+        text(c, end, W - M - c.measureText(end).width, base + 30, font(400, 21), SOFT);
+      });
+      block(44, (c, y) => text(c, 'Where on the body', M, y + 32, font(700, 25), INK), true);
+      d.where.forEach((w) => block(60, (c, y) => row(c, y, w.label, String(w.count), w.count / d.where[0].count, font(400, 24))));
+      block(44, (c, y) => text(c, 'Time of day', M, y + 32, font(700, 25), INK), true);
+      d.parts.forEach((p) => block(60, (c, y) => row(c, y, p.label, String(p.count), p.count / d.maxP, font(400, 24))));
+      if (d.ctx.length) {
+        block(44, (c, y) => text(c, 'Logged alongside', M, y + 32, font(700, 25), INK), true);
+        wrap(d.ctx.map((x) => x.label + ' (' + x.count + ')').join(', '), font(400, 25), WIDTH).forEach((line) => block(36, (c, y) => text(c, line, M, y + 26, font(400, 25), INK)));
+      }
+    });
+    return this.renderPages(blocks);
+  }
+  reportText(range) {
+    const data = this.reportData(range);
+    const lines = ['SomaSense frequency report: last ' + range + ' days', this.fmtShort(data.from) + ' to ' + this.fmtShort(this.TODAY) + ', ' + this.TODAY.slice(0, 4), this.plural(data.inRange.length, 'report') + ' on ' + this.plural(data.days, 'day') + ' · ' + this.plural(data.freeDays, 'symptom-free day') + ' · average severity ' + data.avg, 'The full report is in the attached PDF.', ''];
+    data.groups.forEach((g) => lines.push(g.cat + ': ' + this.plural(g.list.length, 'report') + ', average severity ' + data.mean(g.list)));
+    return lines.join('\n');
+  }
+  sharePages(month) {
+    const { W, M, font, wrap, text, INK, SOFT, LINE } = this.pdfTools();
     const parts = month.split('-').map(Number);
     const first = new Date(parts[0], parts[1] - 1, 1);
     const title = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -1754,7 +1940,6 @@ class Component extends DCLogic {
     const list = this.shareEntries(month);
     const blocks = [];
     const block = (h, draw, keep) => blocks.push({ h: h, draw: draw, keep: !!keep });
-    const text = (c, str, x, y, f, color) => { c.font = f; c.fillStyle = color; c.fillText(str, x, y); };
 
     // Heading.
     block(150, (c, y) => {
@@ -1839,16 +2024,6 @@ class Component extends DCLogic {
       });
     });
 
-    // Lay the blocks out on letter-size pages; headings stay with what follows them.
-    const layout = [[]];
-    let y = M;
-    blocks.forEach((b, i) => {
-      let need = b.h;
-      for (let k = i; blocks[k] && blocks[k].keep && blocks[k + 1]; k++) need += blocks[k + 1].h;
-      if (y + need > BOTTOM && layout[layout.length - 1].length) { layout.push([]); y = M; }
-      layout[layout.length - 1].push({ b: b, y: y });
-      y += b.h;
-    });
     const picture = document.createElement('canvas');
     picture.width = W;
     picture.height = M + blocks[0].h + blocks[1].h;
@@ -1857,20 +2032,7 @@ class Component extends DCLogic {
     pc.fillRect(0, 0, W, picture.height);
     blocks[0].draw(pc, M);
     blocks[1].draw(pc, M + blocks[0].h);
-    const pages = layout.map((items, n) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = W;
-      canvas.height = H;
-      const c = canvas.getContext('2d');
-      c.fillStyle = '#FFFFFF';
-      c.fillRect(0, 0, W, H);
-      items.forEach((it) => it.b.draw(c, it.y));
-      text(c, 'Self-reported log created with SomaSense. Not a medical record or diagnosis.', M, H - 56, font(400, 20), SOFT);
-      c.font = font(400, 20);
-      const page = 'Page ' + (n + 1) + ' of ' + layout.length;
-      text(c, page, W - M - c.measureText(page).width, H - 56, font(400, 20), SOFT);
-      return canvas.toDataURL('image/jpeg', 0.9);
-    });
+    const pages = this.renderPages(blocks);
     return { pages: pages, calendar: picture.toDataURL('image/png') };
   }
   shareText(month, title) {
@@ -1918,23 +2080,47 @@ class Component extends DCLogic {
     });
     return btoa(out);
   }
+  fontsReady() {
+    return (document.fonts ? Promise.all([document.fonts.load('400 20px "Atkinson Hyperlegible"'), document.fonts.load('700 20px "Atkinson Hyperlegible"')]) : Promise.resolve()).catch(() => {});
+  }
   openShare() {
     const month = this.state.calMonth;
-    const ready = document.fonts ? Promise.all([document.fonts.load('400 20px "Atkinson Hyperlegible"'), document.fonts.load('700 20px "Atkinson Hyperlegible"')]) : Promise.resolve();
-    ready.catch(() => {}).then(() => this.setState({ share: { month: month, ...this.sharePages(month) } }));
+    const parts = month.split('-').map(Number);
+    const title = new Date(parts[0], parts[1] - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    this.fontsReady().then(() => this.setState({ share: {
+      tab: 'calendar', heading: 'Share this month’s log', note: 'This sends everything logged this month. You choose the app and the recipient next.',
+      subject: 'SomaSense symptom log: ' + title, text: this.shareText(month, title), name: 'SomaSense-' + month,
+      ...this.sharePages(month)
+    } }));
+  }
+  openReportShare() {
+    const range = this.state.range;
+    if (!this.reportData(range).inRange.length) { this.flash('There are no reports in this period to share.'); return; }
+    this.fontsReady().then(() => this.setState({ share: {
+      tab: 'reports', heading: 'Share this report', note: 'This shares the summary for the last ' + range + ' days. You choose the app and the recipient next.',
+      subject: 'SomaSense frequency report: last ' + range + ' days', text: this.reportText(range), name: 'SomaSense-report-' + range + '-days-' + this.TODAY,
+      pages: this.reportPages(range)
+    } }));
   }
   sendShare() {
     const sh = this.state.share;
-    const parts = sh.month.split('-').map(Number);
-    const title = new Date(parts[0], parts[1] - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     if (!this.live) { this.flash('Sharing opens from the Android app. This preview shows what gets sent.'); return; }
-    const ok = window.AppShell.shareLog('SomaSense symptom log: ' + title, this.shareText(sh.month, title), 'SomaSense-' + sh.month, sh.calendar.split(',')[1], this.pdfBase64(sh.pages));
-    if (!ok) this.flash('The log could not be prepared for sharing.');
+    const pdf = this.pdfBase64(sh.pages);
+    const ok = sh.calendar ? window.AppShell.shareLog(sh.subject, sh.text, sh.name, sh.calendar.split(',')[1], pdf) : window.AppShell.sharePdf(sh.subject, sh.text, sh.name, pdf);
+    if (!ok) this.flash('This could not be prepared for sharing.');
+  }
+  saveShare() {
+    const sh = this.state.share;
+    if (!this.live) { this.flash('Saving opens from the Android app. This preview shows what gets saved.'); return; }
+    if (!window.AppShell.savePdf(sh.name, this.pdfBase64(sh.pages))) this.flash('The PDF could not be prepared.');
   }
   shareVals() {
     const sh = this.state.share;
     return {
-      hasShare: !!sh && this.state.tab === 'calendar' && !this.state.composing,
+      hasShare: !!sh && this.state.tab === sh.tab && !this.state.composing,
+      shareHeading: sh ? sh.heading : '',
+      shareNote: sh ? sh.note : '',
+      saveShare: () => this.saveShare(),
       sharePreviewPages: sh ? sh.pages : [],
       startShare: () => this.openShare(),
       closeShare: () => this.setState({ share: null }),
@@ -1948,7 +2134,7 @@ class Component extends DCLogic {
       current: s.tab === id ? 'page' : undefined,
       weight: s.tab === id ? 700 : 400,
       pill: s.tab === id ? '#D6ECEC' : 'transparent',
-      pick: () => this.setState({ tab: id, ...this.resetZoom() })
+      pick: () => this.setState({ ...(s.editing ? this.endEdit() : {}), tab: id, ...this.resetZoom() })
     });
     return {
       phoneH: Number(this.props.phoneH) || 844,

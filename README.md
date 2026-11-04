@@ -2,9 +2,9 @@
 
 A calendar tool for logging symptoms and sensations felt across the body. Mark points on a 3D body map, add details, then review them by day and by symptom type.
 
-**Status: early draft.** The Android app wraps the design prototype in a WebView, with no internet permission and no cloud backup. Reports and symptom-free days are saved to a file in the app's private storage, the Calendar can share a month as a calendar picture and PDF, and Settings can delete everything stored on the device.
+**Status: early draft.** The Android app wraps the design prototype in a WebView, with no internet permission and no cloud backup. Reports and symptom-free days are saved to a file in the app's private storage, the Calendar and Reports tabs can share or save PDFs, and Settings can delete everything stored on the device.
 
-The Share PDF button on the Reports tab is still a placeholder. The prototype in `design/` keeps sample data and a fixed date so its screens stay populated for review.
+The prototype in `design/` keeps sample data and a fixed date so its screens stay populated for review.
 
 ## Layout
 
