@@ -40,14 +40,24 @@ body{margin:0}
   </div>
 
   <div data-stage style="flex: 1; min-height: 0; position: relative; display: flex; justify-content: center; align-items: flex-start; overflow: hidden">
-    <button type="button" aria-label="{{stageAria}}" onPointerDown="{{stageDown}}" onPointerMove="{{stageMove}}" onPointerUp="{{stageUp}}" onPointerCancel="{{stageCancel}}" onKeyDown="{{stageKey}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background: transparent; cursor: grab; touch-action: none"></button>
+    <button type="button" aria-label="{{stageAria}}" onPointerDown="{{stageDown}}" onPointerMove="{{stageMove}}" onPointerUp="{{stageUp}}" onPointerCancel="{{stageCancel}}" onLostPointerCapture="{{stageCancel}}" onContextMenu="{{noMenu}}" onKeyDown="{{stageKey}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background: transparent; cursor: grab; touch-action: none"></button>
     <canvas aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: {{glDisplay}}; pointer-events: none"></canvas>
     <div data-fig style="position: relative; width: {{figW}}px; height: {{figH}}px; flex: none; transform: {{figTransform}}; pointer-events: none">
       <sc-for list="{{bodyFrames}}" as="f" hint-placeholder-count="1">
         <img src="{{f.url}}" alt="" draggable="false" onLoad="{{figLoad}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: {{f.opacity}}; transform: {{bodyFlip}}; pointer-events: none">
       </sc-for>
+    </div>
+    <div aria-hidden="true" style="position: absolute; left: 50%; top: 0; width: {{figW}}px; height: {{figH}}px; margin-left: {{figHalf}}px; transform: {{figTransform}}; pointer-events: none; mix-blend-mode: multiply">
+      <svg viewBox="-120 0 240 440" preserveAspectRatio="none" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible">
+        <defs><filter id="paintEdge" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="0.7"></feGaussianBlur></filter></defs>
+        <sc-for list="{{areaPaths}}" as="a" hint-placeholder-count="0">
+          <path d="{{a.d}}" fill="#2E8F95" stroke="#2E8F95" stroke-width="0.6" stroke-linejoin="round" opacity="{{a.opacity}}" filter="url(#paintEdge)"></path>
+        </sc-for>
+      </svg>
+    </div>
+    <div style="position: absolute; left: 50%; top: 0; width: {{figW}}px; height: {{figH}}px; margin-left: {{figHalf}}px; transform: {{figTransform}}; pointer-events: none">
       <sc-for list="{{pinButtons}}" as="p" hint-placeholder-count="0">
-        <button type="button" aria-label="{{p.aria}}" disabled="{{p.hidden}}" onClick="{{p.remove}}" style="position: absolute; left: {{p.l}}; top: {{p.t}}; width: {{p.size}}; height: {{p.size}}; transform: translate(-50%, -50%) scale({{markScale}}); border-radius: 50%; border: 2px solid #FFFFFF; background: #B8430F; color: #FFFFFF; font: inherit; font-size: {{p.font}}; font-weight: 700; padding: 0; opacity: {{p.opacity}}; pointer-events: {{p.events}}; cursor: pointer">{{p.n}}</button>
+        <button type="button" aria-label="{{p.aria}}" disabled="{{p.hidden}}" onClick="{{p.remove}}" style="position: absolute; left: {{p.l}}; top: {{p.t}}; width: {{p.size}}; height: {{p.size}}; transform: translate(-50%, -50%) scale({{markScale}}); border-radius: 50%; border: 2px solid #FFFFFF; background: #0B6169; color: #FFFFFF; font: inherit; font-size: {{p.font}}; font-weight: 700; padding: 0; opacity: {{p.opacity}}; pointer-events: {{p.events}}; cursor: pointer">{{p.n}}</button>
       </sc-for>
     </div>
     <sc-if value="{{showSideLabels}}" hint-placeholder-val="{{true}}">
@@ -356,7 +366,7 @@ body{margin:0}
       <div style="display: flex; flex-wrap: wrap; gap: 8px">
         <sc-for list="{{formPoints}}" as="p" hint-placeholder-count="2">
           <span style="display: inline-flex; align-items: center; gap: 6px; height: 44px; padding-left: 6px; border-radius: 22px; background: #FFFFFF; border: 1px solid #C4D0D0; font-size: 15px">
-            <span style="width: 26px; height: 26px; border-radius: 50%; background: #B8430F; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{p.n}}</span>
+            <span style="width: 26px; height: 26px; border-radius: 50%; background: #0B6169; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{p.n}}</span>
             {{p.label}}
             <button type="button" aria-label="{{p.aria}}" onClick="{{p.remove}}" style="width: 36px; height: 42px; border: 0; background: transparent; color: #4F6368; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
@@ -381,10 +391,16 @@ body{margin:0}
     <section>
       <h2 style="margin: 0 0 8px; font-size: 16px">Symptom or sensation type</h2>
       <div style="display: flex; flex-wrap: wrap; gap: 8px">
-        <sc-for list="{{catChips}}" as="c" hint-placeholder-count="8">
-          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+        <sc-for list="{{catChips}}" as="c" hint-placeholder-count="3">
+          <span style="display: inline-flex; align-items: stretch; max-width: 100%; box-sizing: border-box; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}">
+            <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="min-height: 42px; min-width: 0; padding: 10px 4px 10px 14px; text-align: left; line-height: 1.3; overflow-wrap: anywhere; border: 0; border-radius: 22px 0 0 22px; background: transparent; color: inherit; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+            <button type="button" aria-label="{{c.removeAria}}" onClick="{{c.remove}}" style="flex: none; width: 40px; min-height: 42px; border: 0; border-radius: 0 22px 22px 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+            </button>
+          </span>
         </sc-for>
       </div>
+      <input type="text" aria-label="Other type" value="{{form.catOther}}" onChange="{{setCatOther}}" placeholder="Other type" style="width: 100%; height: 44px; margin-top: 8px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
     </section>
 
     <section>
@@ -398,27 +414,42 @@ body{margin:0}
         <span style="font-size: 32px; font-weight: 700; line-height: 1.1">{{form.severity}}</span>
         <span style="color: #4F6368">out of 10 · {{severityWord}}</span>
       </div>
-      <input type="range" min="0" max="10" step="1" aria-label="Severity from 0 to 10" value="{{form.severity}}" onChange="{{setSeverity}}" style="width: 100%; height: 44px; margin: 0; accent-color: #0B6169">
-      <div style="display: flex; justify-content: space-between; font-size: 13px; color: #4F6368; margin-bottom: 10px"><span>None</span><span>Worst imaginable</span></div>
+      <input type="range" min="1" max="10" step="1" aria-label="Severity from 1 to 10" value="{{form.severity}}" onChange="{{setSeverity}}" style="width: 100%; height: 44px; margin: 0; accent-color: #0B6169">
+      <div style="display: flex; justify-content: space-between; font-size: 13px; color: #4F6368; margin-bottom: 10px"><span>Barely noticeable</span><span>Worst imaginable</span></div>
       <label for="sevnote" style="display: block; font-size: 14px; color: #4F6368; margin-bottom: 4px">Severity notes</label>
       <textarea id="sevnote" rows="2" value="{{form.sevNote}}" onChange="{{setSevNote}}" placeholder="Constant or in waves? Does it stop you doing anything?" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit; resize: vertical"></textarea>
     </section>
 
     <section>
       <h2 style="margin: 0 0 8px; font-size: 16px">Medicines taken</h2>
+      <sc-if value="{{noMedChips}}" hint-placeholder-val="{{false}}">
+        <div style="font-size: 13px; color: #4F6368; margin: -4px 0 8px">Medicines you enter are kept here to choose next time.</div>
+      </sc-if>
+      <sc-if value="{{hasMedChips}}" hint-placeholder-val="{{true}}">
       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px">
         <sc-for list="{{medChips}}" as="c" hint-placeholder-count="4">
-          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+          <span style="display: inline-flex; align-items: stretch; max-width: 100%; box-sizing: border-box; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}">
+            <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="min-height: 42px; min-width: 0; padding: 10px 4px 10px 14px; text-align: left; line-height: 1.3; overflow-wrap: anywhere; border: 0; border-radius: 22px 0 0 22px; background: transparent; color: inherit; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+            <button type="button" aria-label="{{c.removeAria}}" onClick="{{c.remove}}" style="flex: none; width: 40px; min-height: 42px; border: 0; border-radius: 0 22px 22px 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+            </button>
+          </span>
         </sc-for>
       </div>
-      <input type="text" aria-label="Other medicine or dose" value="{{form.medOther}}" onChange="{{setMedOther}}" placeholder="Other medicine or dose" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+      </sc-if>
+      <input type="text" aria-label="{{medInputLabel}}" value="{{form.medOther}}" onChange="{{setMedOther}}" placeholder="{{medInputLabel}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
     </section>
 
     <section>
       <h2 style="margin: 0 0 8px; font-size: 16px">Physical activity at the time</h2>
       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px">
         <sc-for list="{{actChips}}" as="c" hint-placeholder-count="6">
-          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+          <span style="display: inline-flex; align-items: stretch; max-width: 100%; box-sizing: border-box; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}">
+            <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="min-height: 42px; min-width: 0; padding: 10px 4px 10px 14px; text-align: left; line-height: 1.3; overflow-wrap: anywhere; border: 0; border-radius: 22px 0 0 22px; background: transparent; color: inherit; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+            <button type="button" aria-label="{{c.removeAria}}" onClick="{{c.remove}}" style="flex: none; width: 40px; min-height: 42px; border: 0; border-radius: 0 22px 22px 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+            </button>
+          </span>
         </sc-for>
       </div>
       <input type="text" aria-label="Other activity" value="{{form.actOther}}" onChange="{{setActOther}}" placeholder="Other activity" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
@@ -426,12 +457,22 @@ body{margin:0}
 
     <section>
       <h2 style="margin: 0 0 8px; font-size: 16px">Other sensations</h2>
+      <sc-if value="{{noSenseChips}}" hint-placeholder-val="{{false}}">
+        <div style="font-size: 13px; color: #4F6368; margin: -4px 0 8px">Sensations you enter are kept here to choose next time.</div>
+      </sc-if>
+      <sc-if value="{{hasSenseChips}}" hint-placeholder-val="{{true}}">
       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px">
-        <sc-for list="{{senseChips}}" as="c" hint-placeholder-count="6">
-          <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+        <sc-for list="{{senseChips}}" as="c" hint-placeholder-count="4">
+          <span style="display: inline-flex; align-items: stretch; max-width: 100%; box-sizing: border-box; border-radius: 22px; border: 1px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}">
+            <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="min-height: 42px; min-width: 0; padding: 10px 4px 10px 14px; text-align: left; line-height: 1.3; overflow-wrap: anywhere; border: 0; border-radius: 22px 0 0 22px; background: transparent; color: inherit; font: inherit; font-size: 15px; cursor: pointer">{{c.label}}</button>
+            <button type="button" aria-label="{{c.removeAria}}" onClick="{{c.remove}}" style="flex: none; width: 40px; min-height: 42px; border: 0; border-radius: 0 22px 22px 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+            </button>
+          </span>
         </sc-for>
       </div>
-      <input type="text" aria-label="Other sensation" value="{{form.senseOther}}" onChange="{{setSenseOther}}" placeholder="Something else you noticed" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+      </sc-if>
+      <input type="text" aria-label="{{senseInputLabel}}" value="{{form.senseOther}}" onChange="{{setSenseOther}}" placeholder="{{senseInputLabel}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 15px">
     </section>
 
     <section>
@@ -487,7 +528,7 @@ body{margin:0}
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense is a free and open source calendar tool from ncubeeight LLC for logging symptoms and sensations felt across the body. This policy explains what happens to the information you enter in the Android app. In short, your log stays on your phone unless you choose to share it, and ncubeeight LLC never receives it.</p>
     <h3 style="margin: 16px 0 6px; font-size: 16px">What the app stores on your phone</h3>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">SomaSense saves the following in its private storage on your phone:</p>
-    <ul style="margin: 0 0 12px; padding-left: 20px; font-size: 15px; line-height: 1.45"><li style="margin-bottom: 4px">Your reports: date, time, symptom or sensation types, body locations, severity, descriptions and notes, medicines, physical activity, other sensations and concerns</li><li style="margin-bottom: 4px">The days you mark as symptom-free</li><li style="margin-bottom: 4px">Your body shape setting</li></ul>
+    <ul style="margin: 0 0 12px; padding-left: 20px; font-size: 15px; line-height: 1.45"><li style="margin-bottom: 4px">Your reports: date, time, symptom or sensation types, body locations, severity, descriptions and notes, medicines, physical activity, other sensations and concerns</li><li style="margin-bottom: 4px">The days you mark as symptom-free</li><li style="margin-bottom: 4px">Your settings: body shape and any symptom types, medicines, activities or sensations you remove from the lists of choices</li></ul>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">This can include health information, so please keep it in mind when you decide who can use your phone.</p>
     <h3 style="margin: 16px 0 6px; font-size: 16px">What ncubeeight LLC collects</h3>
     <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.45">Nothing. The app has no accounts, advertising, analytics or crash reporting. It doesn’t have Android’s internet permission and requests no other permissions, so it can’t reach the internet or read your location, camera, microphone, contacts or files. ncubeeight LLC has no copy of your log and can’t see, recover or delete it for you.</p>
@@ -556,10 +597,9 @@ class Component extends DCLogic {
     super(props);
     this.live = !!props.live && typeof window !== 'undefined' && !!window.AppShell;
     this.TODAY = this.live ? this.iso(new Date()) : '2026-10-27';
-    this.CATS = ['Pain', 'Tingling / numbness', 'Rash / skin', 'Itching', 'Burning', 'Swelling', 'Stiffness', 'Other'];
-    this.MEDS = ['Ibuprofen', 'Gabapentin', 'Antihistamine', 'Topical cream'];
-    this.ACTS = ['Resting', 'Sleeping', 'Walking', 'Exercise', 'Desk work', 'Driving', 'Housework'];
-    this.SENSES = ['Fatigue', 'Headache', 'Dizziness', 'Nausea', 'Fever', 'Poor sleep'];
+    this.CATS = ['Pain', 'Rash / skin', 'Swelling'];
+    this.ACTS = ['Exercise', 'Sitting', 'Resting'];
+    this.HIDDEN = { cats: 'hiddenCats', meds: 'hiddenMeds', acts: 'hiddenActs', senses: 'hiddenSenses' };
     this.AREAS = [['all', 'All areas'], ['head', 'Head & neck'], ['arms', 'Arms & hands'], ['torso', 'Torso & hips'], ['legs', 'Legs & feet']];
     this.BODY = this.bodyModel();
     this.seen = new Map();
@@ -567,6 +607,13 @@ class Component extends DCLogic {
     this.MAX_ZOOM = 6;
     this.SHAPES_URL = '/_blob/41dfc203df0af1a3d60ce026cc9adfc3';
     this.shapeVer = 0;
+    this.HOLD_MS = 350;
+    this.MAX_TOUCHES = 400;
+    this.MAX_PAINT = 2048;
+    this.BRUSH = 6;
+    // A scribbled area joins gaps up to about two and a half brush widths across, and its edge is rounded over most of a brush.
+    this.FILL_CLOSE = 2;
+    this.FILL_SMOOTH = 0.8;
     this.SPLASH_URL = '/_blob/9534eef6231598b7d1ec87cf9fa579a7';
     this.SPLASH_IN = 600;
     this.SPLASH_HOLD = 1600;
@@ -593,6 +640,10 @@ class Component extends DCLogic {
       tab: start === 'calendar' ? 'calendar' : start === 'reports' ? 'reports' : 'home',
       zoom: 1, panX: 0, panY: 0, glFailed: false,
       symptomFree: this.live ? saved.symptomFree : ['2026-10-16', '2026-10-23'],
+      hiddenCats: this.live ? saved.hiddenCats : [],
+      hiddenMeds: this.live ? saved.hiddenMeds : [],
+      hiddenActs: this.live ? saved.hiddenActs : [],
+      hiddenSenses: this.live ? saved.hiddenSenses : [],
       shape: { g: 0, b: 0 }, shapesFailed: false, thumbRev: 0,
       splash: start === 'home' ? 'in' : 'off', splashImg: false,
       composing: start === 'report',
@@ -621,13 +672,13 @@ class Component extends DCLogic {
     return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
   loadData() {
-    const empty = { reports: [], symptomFree: [] };
+    const empty = { reports: [], symptomFree: [], hiddenCats: [], hiddenMeds: [], hiddenActs: [], hiddenSenses: [] };
     let text = '';
     try {
       text = window.AppShell.readData();
       if (!text) return empty;
       const data = JSON.parse(text);
-      return { reports: data.reports || [], symptomFree: data.symptomFree || [] };
+      return { reports: data.reports || [], symptomFree: data.symptomFree || [], hiddenCats: data.hiddenCats || [], hiddenMeds: data.hiddenMeds || [], hiddenActs: data.hiddenActs || [], hiddenSenses: data.hiddenSenses || [] };
     } catch (e) {
       // An unreadable file is set aside rather than overwritten.
       window.AppShell.setAsideData();
@@ -637,23 +688,29 @@ class Component extends DCLogic {
   }
   // Points are stored on the default body, so the chosen shape can be applied to them at launch.
   diskPoint(pt) {
-    let p = pt.p;
-    if (this.BODY.ready() && this.shapeVer > 0) {
-      const P = this.BODY.positions(), B = this.BODY.basePositions();
-      if (pt.v === undefined) pt.v = this.BODY.nearest(pt.p);
-      p = [0, 1, 2].map((k) => B[pt.v + k] + pt.p[k] - P[pt.v + k]);
-    }
     const round = (v) => Math.round(v * 100) / 100;
-    return { id: pt.id, p: p.map(round), n: pt.n.map(round), label: pt.label, area: pt.area };
+    const base = (q) => {
+      if (!this.BODY.ready() || this.shapeVer === 0) return q.p.map(round);
+      const P = this.BODY.positions(), B = this.BODY.basePositions();
+      if (q.v === undefined) q.v = this.BODY.nearest(q.p);
+      return [0, 1, 2].map((k) => round(B[q.v + k] + q.p[k] - P[q.v + k]));
+    };
+    const out = { id: pt.id, p: base(pt), n: pt.n.map(round), label: pt.label, area: pt.area };
+    if (pt.path) {
+      out.path = pt.path.map((q) => ({ p: base(q), n: q.n.map(round) }));
+      out.r = round(pt.r);
+      if (pt.yaw !== undefined) out.yaw = pt.yaw;
+    }
+    return out;
   }
-  saveData(reports, symptomFree) {
+  saveData(reports, symptomFree, hidden = this.hiddenNow()) {
     if (!this.live) return;
-    const json = JSON.stringify({ v: 1, reports: reports.map((r) => ({ ...r, points: r.points.map((p) => this.diskPoint(p)) })), symptomFree: symptomFree });
+    const json = JSON.stringify({ v: 1, reports: reports.map((r) => ({ ...r, points: r.points.map((p) => this.diskPoint(p)) })), symptomFree: symptomFree, hiddenCats: hidden.hiddenCats, hiddenMeds: hidden.hiddenMeds, hiddenActs: hidden.hiddenActs, hiddenSenses: hidden.hiddenSenses });
     if (!window.AppShell.writeData(json)) this.flash('This could not be saved. Check the phone’s free storage.');
   }
   blankForm() {
     this.formDefault = this.live ? this.nowTime() : '14:30';
-    return { time: this.formDefault, cats: [], desc: '', severity: 4, sevNote: '', meds: [], medOther: '', acts: [], actOther: '', senses: [], senseOther: '', concern: '' };
+    return { time: this.formDefault, cats: [], catOther: '', desc: '', severity: 1, sevNote: '', meds: [], medOther: '', acts: [], actOther: '', senses: [], senseOther: '', concern: '' };
   }
 
   bodyModel() {
@@ -928,6 +985,17 @@ class Component extends DCLogic {
   }
 
   setForm(key) { return (e) => { const v = e.target.value; this.setState((s) => ({ form: { ...s.form, [key]: v } })); }; }
+  // A typed entry becomes a chosen bubble as soon as it's entered; saving the report keeps it for next time.
+  addTyped(key, field) {
+    return (e) => {
+      const typed = e.target.value.split(',').map((v) => v.trim()).filter(Boolean);
+      this.setState((s) => {
+        const list = s.form[key].slice();
+        typed.forEach((v) => { if (!list.includes(v)) list.push(v); });
+        return { form: { ...s.form, [key]: list, [field]: '' } };
+      });
+    };
+  }
   toggleForm(key, v) {
     return () => this.setState((s) => {
       const has = s.form[key].includes(v);
@@ -1016,10 +1084,13 @@ class Component extends DCLogic {
   }
   stageDown(e) {
     this.stageEl = e.currentTarget.parentNode;
-    if (!this.touches) this.touches = new Map();
+    // A new gesture starts clean: a touch the system ended without telling us must not count as a second finger.
+    if (!this.touches || e.isPrimary) this.touches = new Map();
     this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
     clearInterval(this.snapTimer);
+    clearTimeout(this.holdTimer);
+    if (this.stroke) this.endStroke(false);
     if (this.touches.size === 2) {
       const t = Array.from(this.touches.values());
       this.pinch = { d: Math.hypot(t[0].x - t[1].x, t[0].y - t[1].y) || 1, z: this.state.zoom, mx: (t[0].x + t[1].x) / 2, my: (t[0].y + t[1].y) / 2 };
@@ -1029,6 +1100,8 @@ class Component extends DCLogic {
     if (this.touches.size === 1) {
       this.pinch = null;
       this.drag = { x: e.clientX, y: e.clientY, yaw: this.state.yaw, panX: this.state.panX, panY: this.state.panY, moved: false };
+      const fig = e.currentTarget.parentNode.querySelector('[data-fig]');
+      this.holdTimer = setTimeout(() => { if (this.drag && !this.drag.moved) this.startStroke(fig, this.drag.x, this.drag.y); }, this.HOLD_MS);
     }
   }
   stageMove(e) {
@@ -1044,9 +1117,10 @@ class Component extends DCLogic {
       this.pinch.my = my;
       return;
     }
+    if (this.stroke) { this.strokeTo(e.clientX, e.clientY); return; }
     if (!this.drag) return;
     const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
-    if (Math.hypot(dx, dy) > 6) this.drag.moved = true;
+    if (Math.hypot(dx, dy) > 6) { this.drag.moved = true; clearTimeout(this.holdTimer); }
     if (!this.drag.moved) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const scale = rect.width / (e.currentTarget.clientWidth || rect.width) || 1;
@@ -1058,6 +1132,13 @@ class Component extends DCLogic {
     this.setState({ yaw: this.normYaw(this.drag.yaw + dx / w * 318 * 0.7) });
   }
   stageUp(e) {
+    clearTimeout(this.holdTimer);
+    if (this.stroke) {
+      this.drag = null;
+      if (this.touches) this.touches.delete(e.pointerId);
+      this.endStroke(true);
+      return;
+    }
     const tapped = this.drag && !this.drag.moved;
     this.drag = null;
     if (this.touches) this.touches.delete(e.pointerId);
@@ -1068,9 +1149,369 @@ class Component extends DCLogic {
     if (tapped) this.stageTap(e);
   }
   stageCancel(e) {
+    if (!this.touches || !this.touches.has(e.pointerId)) return;
+    clearTimeout(this.holdTimer);
+    if (this.stroke) this.endStroke(false);
     this.drag = null;
     this.pinch = null;
     if (this.touches) this.touches.delete(e.pointerId);
+  }
+  // Screen position to the figure's 240 x 440 drawing units.
+  figUnits(fig, x, y) {
+    const rect = fig.getBoundingClientRect();
+    return { sx: (x - rect.left) / rect.width * 240 - 120, sy: (y - rect.top) / rect.height * 440 };
+  }
+  startStroke(fig, x, y) {
+    if (!this.BODY.ready() || this.state.tab !== 'home' || this.state.composing) return;
+    this.stroke = { id: Date.now(), fig: fig, yaw: this.shownYaw(), r: this.BRUSH / this.state.zoom, samples: [], mask: this.meshData && !this.state.glFailed ? new Uint8Array(this.meshData.p.length / 3) : null };
+    this.strokeTo(x, y);
+  }
+  // Brush touches are laid every half brush along the finger's path, so a quick swipe leaves no gaps.
+  // Where the path leaves the body, nothing is laid.
+  strokeTo(x, y) {
+    const st = this.stroke, u = this.figUnits(st.fig, x, y), gap = st.r * 0.5;
+    const from = st.at || u, dist = Math.hypot(u.sx - from.sx, u.sy - from.sy);
+    if (st.at && dist < gap) return;
+    const steps = st.at ? Math.min(60, Math.floor(dist / gap)) : 0;
+    let added = false;
+    for (let k = steps ? 1 : 0; k <= steps; k++) {
+      if (st.samples.length >= this.MAX_TOUCHES) break;
+      const f = steps ? k / steps : 1, sx = from.sx + (u.sx - from.sx) * f, sy = from.sy + (u.sy - from.sy) * f;
+      const hit = this.BODY.cast(sx, sy, st.yaw);
+      if (!hit.hit) continue;
+      const c = this.BODY.classify(hit.p, hit.n, hit.tag);
+      const q = { sx: sx, sy: sy, p: hit.p, n: hit.n, label: c.label, area: c.area };
+      if (st.mask) this.reachAt(st.mask, q, st.r);
+      st.samples.push(q);
+      added = true;
+    }
+    st.at = u;
+    if (added) this.setState({ strokeRev: (this.state.strokeRev || 0) + 1 });
+  }
+  // Which vertices touch which, built once from the mesh's triangles.
+  meshLinks() {
+    if (this.links) return this.links;
+    const T = this.meshData.t, n = this.meshData.p.length / 3, deg = new Int32Array(n + 1);
+    for (let i = 0; i < T.length; i += 3) { deg[T[i]] += 2; deg[T[i + 1]] += 2; deg[T[i + 2]] += 2; }
+    const start = new Int32Array(n + 1);
+    for (let i = 0; i < n; i++) start[i + 1] = start[i] + deg[i];
+    const fill = start.slice(0, n), to = new Int32Array(start[n]);
+    const link = (a, b) => { to[fill[a]++] = b; };
+    for (let i = 0; i < T.length; i += 3) {
+      const a = T[i], b = T[i + 1], c = T[i + 2];
+      link(a, b); link(a, c); link(b, a); link(b, c); link(c, a); link(c, b);
+    }
+    this.links = { start: start, to: to, n: n, mark: new Int32Array(n), stamp: 0, queue: new Int32Array(n) };
+    return this.links;
+  }
+  // Marks the skin one brush touch may color, measured along the skin. It spreads only across connected
+  // skin that faces the same way, so it never jumps a gap between fingers or wraps onto the far side.
+  reachAt(mask, q, r) {
+    const L = this.meshLinks(), P = this.BODY.positions();
+    const N = this.morphN || this.baseN || (this.baseN = Float32Array.from(this.meshData.n, (v) => v / 100));
+    if (!L.dist) { L.dist = new Float32Array(L.n); L.inQueue = new Int32Array(L.n); }
+    if (q.v === undefined) q.v = this.BODY.nearest(q.p);
+    const reach = r * 1.25, stamp = ++L.stamp, size = L.n, first = q.v / 3;
+    L.mark[first] = stamp;
+    L.dist[first] = Math.hypot(P[q.v] - q.p[0], P[q.v + 1] - q.p[1], P[q.v + 2] - q.p[2]);
+    let head = 0, tail = 0;
+    L.queue[tail++ % size] = first;
+    L.inQueue[first] = stamp;
+    while (head < tail) {
+      const v = L.queue[head++ % size], i = v * 3, g = L.dist[v];
+      L.inQueue[v] = 0;
+      mask[v] = 1;
+      for (let j = L.start[v]; j < L.start[v + 1]; j++) {
+        const u = L.to[j], o = u * 3;
+        const along = g + Math.hypot(P[o] - P[i], P[o + 1] - P[i + 1], P[o + 2] - P[i + 2]);
+        if (along > reach || (L.mark[u] === stamp && along >= L.dist[u])) continue;
+        if (N[o] * q.n[0] + N[o + 1] * q.n[1] + N[o + 2] * q.n[2] < 0.15) continue;
+        L.mark[u] = stamp;
+        L.dist[u] = along;
+        if (L.inQueue[u] !== stamp && tail - head < size) { L.inQueue[u] = stamp; L.queue[tail++ % size] = u; }
+      }
+    }
+  }
+  // Paint for the stroke being drawn, as brush touches and the triangles they may color.
+  // Finished areas are filled in and drawn by areaDecal instead.
+  paintNow() {
+    const st = this.stroke, live = st && st.mask ? st : null;
+    const tag = live ? 's' + live.id + '.' + live.samples.length : '';
+    if (this.paintOut && this.paintOut.rev === tag) return this.paintOut;
+    const touches = live ? [].concat(...live.samples.map((q) => [q.p[0], q.p[1], q.p[2], live.r])) : [];
+    const count = Math.min(this.MAX_PAINT, touches.length / 4);
+    const T = this.meshData.t, tris = [];
+    if (count) {
+      const mask = live.mask;
+      for (let i = 0; i < T.length; i += 3) if (mask[T[i]] || mask[T[i + 1]] || mask[T[i + 2]]) tris.push(T[i], T[i + 1], T[i + 2]);
+    }
+    this.paintOut = { rev: tag, n: count, q: Float32Array.from(touches.slice(0, count * 4)), tris: Uint16Array.from(tris) };
+    return this.paintOut;
+  }
+  // The side an older area was drawn from, judged by which way its skin faces.
+  pathYaw(path) {
+    const n = path.reduce((a, q) => [a[0] + q.n[0], a[1] + q.n[2]], [0, 0]);
+    return this.normYaw(Math.round(Math.atan2(-n[0], n[1]) * 180 / Math.PI / 5) * 5);
+  }
+  // A finished area as a soft mask seen from the side it was drawn on, plus the skin it may color.
+  // The mask follows the area's touches, so it is rebuilt when the body shape changes.
+  areaDecal(pt) {
+    if (!this.decalCache) this.decalCache = new WeakMap();
+    const hit = this.decalCache.get(pt.path);
+    if (hit && hit.ver === this.shapeVer && hit.r === pt.r) return hit;
+    const yaw = pt.yaw !== undefined ? pt.yaw : this.pathYaw(pt.path);
+    const mask = this.areaMask(pt.path, pt.r, yaw);
+    const d = { ver: this.shapeVer, r: pt.r, yaw: yaw, mask: mask, tris: mask ? this.areaTris(pt.path, mask, yaw) : new Uint16Array(0) };
+    this.decalCache.set(pt.path, d);
+    return d;
+  }
+  // Distance in cells from every cell to the nearest source cell (Felzenszwalb and Huttenlocher).
+  // Every row and column must hold a source; the masks' empty borders make sure of that.
+  gridDistance(w, h, src) {
+    const INF = 1e20, len = Math.max(w, h), g = new Float64Array(w * h);
+    const f = new Float64Array(len), d = new Float64Array(len), v = new Int32Array(len), z = new Float64Array(len + 1);
+    for (let i = 0; i < g.length; i++) g[i] = src[i] ? 0 : INF;
+    const line = (n, at) => {
+      for (let q = 0; q < n; q++) f[q] = g[at(q)];
+      let k = 0;
+      v[0] = 0; z[0] = -INF; z[1] = INF;
+      for (let q = 1; q < n; q++) {
+        let s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+        while (s <= z[k]) { k--; s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]); }
+        k++; v[k] = q; z[k] = s; z[k + 1] = INF;
+      }
+      k = 0;
+      for (let q = 0; q < n; q++) { while (z[k + 1] < q) k++; d[q] = (q - v[k]) * (q - v[k]) + f[v[k]]; }
+      for (let q = 0; q < n; q++) g[at(q)] = d[q];
+    };
+    for (let x = 0; x < w; x++) line(h, (q) => q * w + x);
+    for (let y = 0; y < h; y++) line(w, (q) => y * w + q);
+    for (let i = 0; i < g.length; i++) g[i] = Math.sqrt(g[i]);
+    return g;
+  }
+  // Fills a scribbled area and smooths its edge, on a grid in the view it was drawn from.
+  // Gaps between passes close up, enclosed holes fill, and the outline is blurred and cut at
+  // halfway, so straight edges keep their place while bumps and corners round off.
+  areaMask(path, r, yaw) {
+    if (!path.length || !this.BODY.ready()) return null;
+    const pts = path.map((q) => { const s = this.BODY.toScreen(q.p[0], q.p[1], q.p[2], yaw); return [s.sx, s.sy]; });
+    const close = r * this.FILL_CLOSE, blur = r * this.FILL_SMOOTH, reach = r + close;
+    const pad = reach + 3 * blur + r;
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+    const x0 = Math.min(...xs) - pad, y0 = Math.min(...ys) - pad;
+    const spanX = Math.max(...xs) + pad - x0, spanY = Math.max(...ys) + pad - y0;
+    const h = Math.max(r / 4, Math.max(spanX, spanY) / 256);
+    const w = Math.ceil(spanX / h), ht = Math.ceil(spanY / h), size = w * ht;
+    // Distance from each cell to the nearest brush touch, within reach of one.
+    const near = new Float32Array(size).fill(Infinity);
+    pts.forEach(([px, py]) => {
+      const i0 = Math.max(0, Math.floor((px - reach - x0) / h)), i1 = Math.min(w - 1, Math.ceil((px + reach - x0) / h));
+      const j0 = Math.max(0, Math.floor((py - reach - y0) / h)), j1 = Math.min(ht - 1, Math.ceil((py + reach - y0) / h));
+      for (let j = j0; j <= j1; j++) {
+        const dy = y0 + (j + 0.5) * h - py;
+        for (let i = i0; i <= i1; i++) {
+          const dist = Math.hypot(x0 + (i + 0.5) * h - px, dy), at = j * w + i;
+          if (dist < near[at]) near[at] = dist;
+        }
+      }
+    });
+    // Grow the paint by `close`, then shrink it back by the same amount, keeping everything painted.
+    const grown = new Uint8Array(size);
+    for (let i = 0; i < size; i++) grown[i] = near[i] > reach ? 1 : 0;
+    const fromEdge = this.gridDistance(w, ht, grown);
+    const fill = new Uint8Array(size);
+    for (let i = 0; i < size; i++) fill[i] = near[i] <= r || (fromEdge[i] - 0.5) * h >= close ? 1 : 0;
+    // Anything unpainted that can't reach the border is enclosed, so it fills in.
+    const out = new Uint8Array(size), queue = new Int32Array(size);
+    let head = 0, tail = 0;
+    const visit = (at) => { if (!fill[at] && !out[at]) { out[at] = 1; queue[tail++] = at; } };
+    for (let i = 0; i < w; i++) { visit(i); visit((ht - 1) * w + i); }
+    for (let j = 0; j < ht; j++) { visit(j * w); visit(j * w + w - 1); }
+    while (head < tail) {
+      const at = queue[head++], i = at % w;
+      if (i > 0) visit(at - 1);
+      if (i < w - 1) visit(at + 1);
+      if (at >= w) visit(at - w);
+      if (at < size - w) visit(at + w);
+    }
+    // Blur the filled shape; the shader draws its edge where the blur crosses one half.
+    const sig = blur / h, rad = Math.ceil(sig * 3), ker = [];
+    for (let k = -rad; k <= rad; k++) ker.push(Math.exp(-k * k / (2 * sig * sig)));
+    const sum = ker.reduce((a, b) => a + b, 0);
+    const across = new Float32Array(size), soft = new Float32Array(size);
+    for (let j = 0; j < ht; j++) for (let i = 0; i < w; i++) {
+      let v = 0;
+      for (let k = -rad; k <= rad; k++) { const x = i + k; if (x >= 0 && x < w && !out[j * w + x]) v += ker[k + rad]; }
+      across[j * w + i] = v / sum;
+    }
+    for (let j = 0; j < ht; j++) for (let i = 0; i < w; i++) {
+      let v = 0;
+      for (let k = -rad; k <= rad; k++) { const y = j + k; if (y >= 0 && y < ht) v += across[y * w + i] * ker[k + rad]; }
+      soft[j * w + i] = v / sum;
+    }
+    const bytes = new Uint8Array(size), sat = new Int32Array((w + 1) * (ht + 1));
+    for (let j = 0; j < ht; j++) for (let i = 0; i < w; i++) {
+      const v = soft[j * w + i];
+      bytes[j * w + i] = Math.round(v * 255);
+      sat[(j + 1) * (w + 1) + i + 1] = (v > 0.3 ? 1 : 0) + sat[j * (w + 1) + i + 1] + sat[(j + 1) * (w + 1) + i] - sat[j * (w + 1) + i];
+    }
+    return { x0: x0, y0: y0, h: h, w: w, ht: ht, bytes: bytes, sat: sat };
+  }
+  // Which triangles touch which, through a shared corner, built once from the mesh.
+  triLinks() {
+    if (this.tlinks) return this.tlinks;
+    const T = this.meshData.t, n = this.meshData.p.length / 3, start = new Int32Array(n + 1);
+    for (let i = 0; i < T.length; i++) start[T[i] + 1]++;
+    for (let i = 0; i < n; i++) start[i + 1] += start[i];
+    const fill = start.slice(0, n), to = new Int32Array(T.length);
+    for (let i = 0; i < T.length; i++) to[fill[T[i]]++] = Math.floor(i / 3);
+    this.tlinks = { start: start, to: to };
+    return this.tlinks;
+  }
+  // The skin an area's mask may color: connected triangles, starting under the touches, that face
+  // the side it was drawn from and overlap the mask. It never crosses to skin hidden behind.
+  areaTris(path, mask, yaw) {
+    const T = this.meshData.t, P = this.BODY.positions(), L = this.triLinks();
+    const N = this.morphN || this.baseN || (this.baseN = Float32Array.from(this.meshData.n, (v) => v / 100));
+    const d = this.BODY.viewDir(yaw), seen = new Uint8Array(T.length / 3), queue = [], out = [];
+    const W = mask.w + 1;
+    const cell = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const ok = (t) => {
+      let face = 0, minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      for (let k = 0; k < 3; k++) {
+        const o = T[t * 3 + k] * 3;
+        face += N[o] * d[0] + N[o + 1] * d[1] + N[o + 2] * d[2];
+        const s = this.BODY.toScreen(P[o], P[o + 1], P[o + 2], yaw);
+        minX = Math.min(minX, s.sx); maxX = Math.max(maxX, s.sx); minY = Math.min(minY, s.sy); maxY = Math.max(maxY, s.sy);
+      }
+      if (face < -0.15) return false;
+      const i0 = Math.floor((minX - mask.x0) / mask.h - 0.5), i1 = Math.ceil((maxX - mask.x0) / mask.h - 0.5);
+      const j0 = Math.floor((minY - mask.y0) / mask.h - 0.5), j1 = Math.ceil((maxY - mask.y0) / mask.h - 0.5);
+      if (i1 < 0 || j1 < 0 || i0 >= mask.w || j0 >= mask.ht) return false;
+      const a = cell(i0, 0, mask.w - 1), b = cell(i1, 0, mask.w - 1) + 1, c = cell(j0, 0, mask.ht - 1), e = cell(j1, 0, mask.ht - 1) + 1;
+      return mask.sat[e * W + b] - mask.sat[c * W + b] - mask.sat[e * W + a] + mask.sat[c * W + a] > 0;
+    };
+    const offer = (t) => { if (!seen[t]) { seen[t] = 1; if (ok(t)) queue.push(t); } };
+    path.forEach((q) => {
+      if (q.v === undefined) q.v = this.BODY.nearest(q.p);
+      const v = q.v / 3;
+      for (let j = L.start[v]; j < L.start[v + 1]; j++) offer(L.to[j]);
+    });
+    while (queue.length) {
+      const t = queue.pop();
+      out.push(T[t * 3], T[t * 3 + 1], T[t * 3 + 2]);
+      for (let k = 0; k < 3; k++) {
+        const v = T[t * 3 + k];
+        for (let j = L.start[v]; j < L.start[v + 1]; j++) offer(L.to[j]);
+      }
+    }
+    return Uint16Array.from(out);
+  }
+  // A short stroke is just a point; a longer one becomes an area anchored at its middle.
+  endStroke(keep) {
+    const st = this.stroke;
+    this.stroke = null;
+    this.setState({ strokeRev: (this.state.strokeRev || 0) + 1 });
+    if (!keep || !st.samples.length) return;
+    const xs = st.samples.map((q) => q.sx), ys = st.samples.map((q) => q.sy);
+    const span = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+    const mid = st.samples[Math.floor(st.samples.length / 2)];
+    const id = 'p' + Math.random().toString(36).slice(2, 9);
+    let pt = { id: id, p: mid.p, n: mid.n, v: mid.v, label: mid.label, area: mid.area };
+    if (st.samples.length >= 3 && span >= st.r * 2) {
+      const count = (key) => {
+        const m = {};
+        st.samples.forEach((q) => { m[q[key]] = (m[q[key]] || 0) + 1; });
+        return Object.keys(m).sort((a, b) => m[b] - m[a]);
+      };
+      const labels = count('label');
+      pt = { ...pt, v: mid.v, label: 'Area: ' + labels.slice(0, 3).join(', ') + (labels.length > 3 ? ' and nearby' : ''), area: count('area')[0], r: st.r, yaw: st.yaw, path: st.samples.map((q) => ({ p: q.p, n: q.n, v: q.v })) };
+    }
+    this.placedAt = Date.now();
+    this.setState((s) => ({ selected: s.selected.concat([pt]) }));
+  }
+  liveOblong() {
+    const st = this.stroke;
+    if (!st || !st.samples.length) return [];
+    return [{ path: st.samples, r: st.r, live: true }];
+  }
+  oblongs(list, yaw) {
+    return list.map((o) => ({ d: this.areaShape(o.path, o.r, yaw, !o.live), opacity: o.live ? 0.7 : 0.6 })).filter((a) => a.d);
+  }
+  // Each piece is wound the same way so the pieces join into one painted shape.
+  // The outline's corners, laid onto the nearest part of the body so its edges stay on the skin.
+  // Saved areas keep this per body shape; the stroke being drawn skips it to stay quick.
+  areaOutline(path, r, snap) {
+    const hit = this.outlineCache && this.outlineCache.get(path);
+    if (snap && hit && hit.ver === this.shapeVer && hit.r === r) return hit.data;
+    const norm = (u) => { const l = Math.hypot(u[0], u[1], u[2]) || 1; return [u[0] / l, u[1] / l, u[2] / l]; };
+    const cross = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const P = this.BODY.positions();
+    const onBody = (p, u, k) => {
+      const q = [p[0] + u[0] * k, p[1] + u[1] * k, p[2] + u[2] * k];
+      if (!snap) return q;
+      // Onto the plane of the nearest skin point, so the edge stays smooth instead of jumping between mesh points.
+      const v = this.BODY.nearest(q), N = this.morphN, raw = this.meshData.n;
+      const m = norm(N ? [N[v], N[v + 1], N[v + 2]] : [raw[v], raw[v + 1], raw[v + 2]]);
+      const d = (q[0] - P[v]) * m[0] + (q[1] - P[v + 1]) * m[1] + (q[2] - P[v + 2]) * m[2];
+      return [q[0] - m[0] * d, q[1] - m[1] * d, q[2] - m[2] * d];
+    };
+    const n = path.length;
+    const frames = path.map((q, i) => {
+      const a = path[Math.max(0, i - 1)].p, b = path[Math.min(n - 1, i + 1)].p;
+      const t = n === 1 ? norm(cross(q.n, [0, 0, 1])) : norm([b[0] - a[0], b[1] - a[1], b[2] - a[2]]);
+      const side = norm(cross(q.n, t));
+      return { n: q.n, left: onBody(q.p, side, r), right: onBody(q.p, side, -r), t: t, side: side, p: q.p };
+    });
+    const caps = [[frames[0], -1], [frames[n - 1], 1]].map(([f, dir]) => {
+      const pts = [];
+      for (let k = 0; k <= 8; k++) {
+        const th = Math.PI * k / 8;
+        pts.push(onBody(f.p, [0, 1, 2].map((j) => f.side[j] * Math.cos(th) + f.t[j] * dir * Math.sin(th)), r));
+      }
+      return { n: f.n, pts: pts };
+    });
+    const data = { frames: frames, caps: caps };
+    if (snap) {
+      if (!this.outlineCache) this.outlineCache = new WeakMap();
+      this.outlineCache.set(path, { ver: this.shapeVer, r: r, data: data });
+    }
+    return data;
+  }
+  areaShape(path, r, yaw, snap) {
+    const view = this.BODY.viewDir(yaw);
+    const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+    const scr = (p) => { const q = this.BODY.toScreen(p[0], p[1], p[2], yaw); return [q.sx, q.sy]; };
+    const poly = (pts) => {
+      let area = 0;
+      pts.forEach((p, i) => { const q = pts[(i + 1) % pts.length]; area += p[0] * q[1] - q[0] * p[1]; });
+      const list = area < 0 ? pts.slice().reverse() : pts;
+      return 'M ' + list.map((p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L ') + ' Z';
+    };
+    if (!path.length || !this.BODY.ready()) return '';
+    const o = this.areaOutline(path, r, snap);
+    const seen = (nv) => dot(nv, view) > 0.05;
+    const parts = [];
+    for (let i = 0; i < o.frames.length - 1; i++) {
+      const f = o.frames[i], g = o.frames[i + 1];
+      if (!seen(f.n) || !seen(g.n)) continue;
+      parts.push(poly([scr(f.left), scr(g.left), scr(g.right), scr(f.right)]));
+    }
+    o.caps.forEach((c) => { if (seen(c.n)) parts.push(poly(c.pts.map(scr))); });
+    return parts.join(' ');
+  }
+  // The visible runs of an area's path, as an SVG path in figure units.
+  areaD(path, yaw) {
+    const d = this.BODY.viewDir(yaw);
+    let out = '', open = false;
+    path.forEach((q) => {
+      if (q.n[0] * d[0] + q.n[1] * d[1] + q.n[2] * d[2] < 0.02) { open = false; return; }
+      const t = this.BODY.toScreen(q.p[0], q.p[1], q.p[2], yaw);
+      const xy = t.sx.toFixed(1) + ' ' + t.sy.toFixed(1);
+      out += (open ? ' L ' : ' M ') + xy + (open ? '' : ' L ' + xy);
+      open = true;
+    });
+    return out.trim();
   }
   stageTap(e) {
     const rect = e.currentTarget.parentNode.querySelector('[data-fig]').getBoundingClientRect();
@@ -1155,6 +1596,7 @@ class Component extends DCLogic {
         float shade = clamp(((0.5 * diff + 0.4 * hemi + 0.1) * ao + spec) * (1.0 - rim), 0.0, 1.0);
         gl_FragColor = vec4(mix(vec3(84.0, 102.0, 106.0), vec3(232.0, 239.0, 238.0), shade) / 255.0, 1.0);
       }`));
+    ['aP', 'aN', 'aO'].forEach((name, i) => gl.bindAttribLocation(prog, i, name));
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
     gl.useProgram(prog);
@@ -1171,7 +1613,9 @@ class Component extends DCLogic {
     ctx.bufP = attr('aP', Float32Array.from(this.BODY.positions()), 3);
     ctx.bufN = attr('aN', this.morphN || Float32Array.from(data.n, (v) => v / 100), 3);
     attr('aO', Float32Array.from(data.a, (v) => v / 100), 1);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+    ctx.prog = prog;
+    ctx.ibuf = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ctx.ibuf);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Uint16Array.from(data.t), gl.STATIC_DRAW);
     gl.enable(gl.DEPTH_TEST);
     gl.clearColor(0, 0, 0, 0);
@@ -1223,6 +1667,199 @@ class Component extends DCLogic {
     gl.uniform4f(ctx.uMap, map[0], map[1], map[2], map[3]);
     gl.drawElements(gl.TRIANGLES, ctx.count, gl.UNSIGNED_SHORT, 0);
   }
+  paintInit(ctx) {
+    const gl = ctx.gl;
+    if (!gl.getExtension('OES_texture_float')) return null;
+    const sharp = !!gl.getExtension('OES_standard_derivatives');
+    const shader = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, shader(gl.VERTEX_SHADER, `
+      attribute vec3 aP;
+      uniform float uC, uS, uCp, uSp; uniform vec4 uMap;
+      varying vec3 vW;
+      void main() {
+        float cx = aP.x * uC + aP.z * uS, cz = -aP.x * uS + aP.z * uC, v = aP.y - 220.0;
+        float sy = v * uCp + cz * uSp + 220.0, d = cz * uCp - v * uSp;
+        vW = aP;
+        gl_Position = vec4((cx + 120.0) * uMap.x + uMap.z, sy * uMap.y + uMap.w, -d / 300.0, 1.0);
+      }`));
+    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, `
+      ${sharp ? '#extension GL_OES_standard_derivatives : enable' : ''}
+      precision highp float;
+      uniform sampler2D uQ; uniform float uN;
+      varying vec3 vW;
+      void main() {
+        float m = 100.0;
+        for (int i = 0; i < ${this.MAX_PAINT}; i++) {
+          if (float(i) >= uN) break;
+          vec4 q = texture2D(uQ, vec2((float(i) + 0.5) / uN, 0.5));
+          m = min(m, distance(vW, q.xyz) / q.w);
+        }
+        ${sharp ? 'float a = clamp((1.0 - m) / max(fwidth(m), 1e-4) + 0.5, 0.0, 1.0);' : 'float a = 1.0 - smoothstep(0.95, 1.05, m);'}
+        if (a <= 0.0) discard;
+        gl_FragColor = vec4(mix(vec3(1.0), vec3(46.0, 143.0, 149.0) / 255.0, a * 0.65), 1.0);
+      }`));
+    gl.bindAttribLocation(prog, 0, 'aP');
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    const p = { prog: prog, tex: gl.createTexture(), ibuf: gl.createBuffer(), rev: null, count: 0, n: 0 };
+    ['uC', 'uS', 'uCp', 'uSp', 'uMap', 'uQ', 'uN'].forEach((n) => { p[n] = gl.getUniformLocation(prog, n); });
+    gl.bindTexture(gl.TEXTURE_2D, p.tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return p;
+  }
+  // Draws finished areas from their masks: each is projected back onto the skin from the side it was drawn on.
+  decalInit(ctx) {
+    const gl = ctx.gl;
+    const shader = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const sharp = !!gl.getExtension('OES_standard_derivatives');
+    const prog = gl.createProgram();
+    gl.attachShader(prog, shader(gl.VERTEX_SHADER, `
+      attribute vec3 aP; attribute vec3 aN;
+      uniform float uC, uS, uCp, uSp; uniform vec4 uMap;
+      uniform float uC2, uS2; uniform vec4 uBox; uniform vec3 uView;
+      varying vec2 vUV; varying float vF;
+      void main() {
+        float cx = aP.x * uC + aP.z * uS, cz = -aP.x * uS + aP.z * uC, v = aP.y - 220.0;
+        float sy = v * uCp + cz * uSp + 220.0, d = cz * uCp - v * uSp;
+        float bx = aP.x * uC2 + aP.z * uS2, bz = -aP.x * uS2 + aP.z * uC2;
+        vUV = vec2((bx - uBox.x) * uBox.z, (v * uCp + bz * uSp + 220.0 - uBox.y) * uBox.w);
+        vF = dot(aN, uView);
+        gl_Position = vec4((cx + 120.0) * uMap.x + uMap.z, sy * uMap.y + uMap.w, -d / 300.0, 1.0);
+      }`));
+    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, `
+      ${sharp ? '#extension GL_OES_standard_derivatives : enable' : ''}
+      precision mediump float;
+      uniform sampler2D uM;
+      varying vec2 vUV; varying float vF;
+      void main() {
+        // The edge is kept about one screen pixel wide, so it stays crisp where the mask wraps round a limb.
+        float m = texture2D(uM, vUV).a;
+        ${sharp ? 'float a = clamp((m - 0.5) / max(fwidth(m), 1e-4) + 0.5, 0.0, 1.0) * clamp((vF - 0.02) / max(fwidth(vF), 1e-4) + 0.5, 0.0, 1.0);' : 'float a = smoothstep(0.47, 0.53, m) * step(0.02, vF);'}
+        if (a <= 0.0) discard;
+        gl_FragColor = vec4(mix(vec3(1.0), vec3(46.0, 143.0, 149.0) / 255.0, a * 0.65), 1.0);
+      }`));
+    gl.bindAttribLocation(prog, 0, 'aP');
+    gl.bindAttribLocation(prog, 1, 'aN');
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    const p = { prog: prog, items: new Map() };
+    ['uC', 'uS', 'uCp', 'uSp', 'uMap', 'uC2', 'uS2', 'uBox', 'uView', 'uM'].forEach((n) => { p[n] = gl.getUniformLocation(prog, n); });
+    return p;
+  }
+  decalPass(ctx, yaw, map) {
+    const gl = ctx.gl;
+    const list = this.state.selected.filter((pt) => pt.path).map((pt) => this.areaDecal(pt)).filter((d) => d.mask && d.tris.length);
+    if (ctx.decal === undefined) {
+      if (!list.length) return;
+      ctx.decal = this.decalInit(ctx);
+    }
+    const p = ctx.decal;
+    if (!p) return;
+    // Textures and index buffers of areas no longer shown are given back.
+    p.items.forEach((item, d) => {
+      if (list.includes(d)) return;
+      gl.deleteTexture(item.tex);
+      gl.deleteBuffer(item.ibuf);
+      p.items.delete(d);
+    });
+    if (!list.length) return;
+    const t = yaw * Math.PI / 180, a = 8 * Math.PI / 180;
+    gl.useProgram(p.prog);
+    gl.uniform1f(p.uC, Math.cos(t));
+    gl.uniform1f(p.uS, Math.sin(t));
+    gl.uniform1f(p.uCp, Math.cos(a));
+    gl.uniform1f(p.uSp, Math.sin(a));
+    gl.uniform4f(p.uMap, map[0], map[1], map[2], map[3]);
+    gl.uniform1i(p.uM, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.DST_COLOR, gl.ZERO);
+    gl.depthFunc(gl.LEQUAL);
+    gl.depthMask(false);
+    gl.enable(gl.POLYGON_OFFSET_FILL);
+    gl.polygonOffset(-1, -1);
+    list.forEach((d) => {
+      let item = p.items.get(d);
+      if (!item) {
+        item = { tex: gl.createTexture(), ibuf: gl.createBuffer() };
+        gl.bindTexture(gl.TEXTURE_2D, item.tex);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.ALPHA, d.mask.w, d.mask.ht, 0, gl.ALPHA, gl.UNSIGNED_BYTE, d.mask.bytes);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, item.ibuf);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, d.tris, gl.STATIC_DRAW);
+        p.items.set(d, item);
+      }
+      const m = d.mask, ty = d.yaw * Math.PI / 180, v = this.BODY.viewDir(d.yaw);
+      gl.uniform1f(p.uC2, Math.cos(ty));
+      gl.uniform1f(p.uS2, Math.sin(ty));
+      gl.uniform4f(p.uBox, m.x0, m.y0, 1 / (m.w * m.h), 1 / (m.ht * m.h));
+      gl.uniform3f(p.uView, v[0], v[1], v[2]);
+      gl.bindTexture(gl.TEXTURE_2D, item.tex);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, item.ibuf);
+      gl.drawElements(gl.TRIANGLES, d.tris.length, gl.UNSIGNED_SHORT, 0);
+    });
+    gl.disable(gl.POLYGON_OFFSET_FILL);
+    gl.depthMask(true);
+    gl.depthFunc(gl.LESS);
+    gl.disable(gl.BLEND);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ctx.ibuf);
+    gl.useProgram(ctx.prog);
+  }
+  // Multiplies the tint into the body already drawn, on the same surface.
+  paintPass(ctx, yaw, map) {
+    this.decalPass(ctx, yaw, map);
+    const paint = this.paintNow();
+    if (!paint.n) return;
+    if (ctx.paint === undefined) ctx.paint = this.paintInit(ctx);
+    const p = ctx.paint, gl = ctx.gl;
+    if (!p) {
+      // Without float textures the outlines drawn over the picture stand in.
+      if (!this.noGLPaint) { this.noGLPaint = true; this.setState({ strokeRev: (this.state.strokeRev || 0) + 1 }); }
+      return;
+    }
+    if (p.rev !== paint.rev) {
+      gl.bindTexture(gl.TEXTURE_2D, p.tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, paint.n, 1, 0, gl.RGBA, gl.FLOAT, paint.q);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, p.ibuf);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, paint.tris, gl.DYNAMIC_DRAW);
+      p.rev = paint.rev;
+      p.count = paint.tris.length;
+      p.n = paint.n;
+    }
+    const t = yaw * Math.PI / 180, a = 8 * Math.PI / 180;
+    gl.useProgram(p.prog);
+    gl.uniform1f(p.uC, Math.cos(t));
+    gl.uniform1f(p.uS, Math.sin(t));
+    gl.uniform1f(p.uCp, Math.cos(a));
+    gl.uniform1f(p.uSp, Math.sin(a));
+    gl.uniform4f(p.uMap, map[0], map[1], map[2], map[3]);
+    gl.uniform1f(p.uN, p.n);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, p.tex);
+    gl.uniform1i(p.uQ, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, p.ibuf);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.DST_COLOR, gl.ZERO);
+    gl.depthFunc(gl.LEQUAL);
+    gl.depthMask(false);
+    gl.enable(gl.POLYGON_OFFSET_FILL);
+    gl.polygonOffset(-1, -1);
+    gl.drawElements(gl.TRIANGLES, p.count, gl.UNSIGNED_SHORT, 0);
+    gl.disable(gl.POLYGON_OFFSET_FILL);
+    gl.depthMask(true);
+    gl.depthFunc(gl.LESS);
+    gl.disable(gl.BLEND);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ctx.ibuf);
+    gl.useProgram(ctx.prog);
+  }
   // Fits the whole figure into a viewport of the given pixel size.
   fitMap(w, h) {
     const k = 0.96, fw = h * k * 240 / 440;
@@ -1255,7 +1892,9 @@ class Component extends DCLogic {
         gl.viewport(0, 0, z.w, z.h);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         const st = stage.getBoundingClientRect(), r = stage.querySelector('[data-fig]').getBoundingClientRect();
-        this.glPaint(ctx, this.shownYaw(), [2 * r.width / 240 / st.width, -2 * r.height / 440 / st.height, 2 * (r.left - st.left) / st.width - 1, 1 - 2 * (r.top - st.top) / st.height]);
+        const map = [2 * r.width / 240 / st.width, -2 * r.height / 440 / st.height, 2 * (r.left - st.left) / st.width - 1, 1 - 2 * (r.top - st.top) / st.height];
+        this.glPaint(ctx, this.shownYaw(), map);
+        this.paintPass(ctx, this.shownYaw(), map);
       }
     }
   }
@@ -1267,7 +1906,8 @@ class Component extends DCLogic {
   customShape() { const b = this.shapeNow || this.state.shape; return !!(b.g || b.b); }
   bodyLive() {
     const s = this.state;
-    return (s.zoom > 1 || (this.customShape() && this.shapeVer > 0)) && !!this.meshData && !s.glFailed;
+    const painted = !this.noGLPaint && (!!this.stroke || s.selected.some((p) => p.path));
+    return (s.zoom > 1 || painted || (this.customShape() && this.shapeVer > 0)) && !!this.meshData && !s.glFailed;
   }
   loadShapes() {
     if (!this.shapesLoad) {
@@ -1290,8 +1930,9 @@ class Component extends DCLogic {
     const b = this.shapeNow || this.state.shape, d = this.shapeData;
     const P = this.BODY.positions();
     const pts = [];
-    this.state.selected.forEach((p) => pts.push(p));
-    this.state.reports.forEach((r) => r.points.forEach((p) => pts.push(p)));
+    const add = (p) => { pts.push(p); if (p.path) p.path.forEach((q) => pts.push(q)); };
+    this.state.selected.forEach(add);
+    this.state.reports.forEach((r) => r.points.forEach(add));
     pts.forEach((p) => {
       if (p.v === undefined) p.v = this.BODY.nearest(p.p);
       p.o = [p.p[0] - P[p.v], p.p[1] - P[p.v + 1], p.p[2] - P[p.v + 2]];
@@ -1415,21 +2056,52 @@ class Component extends DCLogic {
     }
     this.setBody({ g: 0, b: 0 });
     try { localStorage.clear(); } catch (e) { /* nothing was stored */ }
-    this.setState({ wipeArmed: false, reports: [], symptomFree: [], selected: [], form: this.blankForm(), composing: false, detailId: null, deleteArmed: false, share: null, editing: null });
+    this.setState({ wipeArmed: false, reports: [], symptomFree: [], hiddenCats: [], hiddenMeds: [], hiddenActs: [], hiddenSenses: [], selected: [], form: this.blankForm(), composing: false, detailId: null, deleteArmed: false, share: null, editing: null });
     this.flash('All stored data was deleted');
   }
   removePin(id) { this.setState((s) => ({ selected: s.selected.filter((p) => p.id !== id) })); }
 
+  // Choices for a form list: the starting set (activities only), then the person's own entries, most used first.
+  choices(key, all) {
+    const count = {}, hidden = all ? [] : this.state[this.HIDDEN[key]], start = key === 'acts' ? this.ACTS : key === 'cats' ? this.CATS : [];
+    this.state.reports.forEach((r) => r[key].forEach((m) => { count[m] = (count[m] || 0) + 1; }));
+    const own = Object.keys(count).filter((m) => !start.includes(m)).sort((a, b) => count[b] - count[a]);
+    return start.concat(own).filter((m) => !hidden.includes(m));
+  }
+  hiddenNow(over) {
+    return { hiddenCats: this.state.hiddenCats, hiddenMeds: this.state.hiddenMeds, hiddenActs: this.state.hiddenActs, hiddenSenses: this.state.hiddenSenses, ...over };
+  }
+  // Takes a choice off the list; past reports keep it.
+  hideChoice(key, m) {
+    const s = this.state, field = this.HIDDEN[key], hidden = this.hiddenNow({ [field]: s[field].concat([m]) });
+    this.saveData(s.reports, s.symptomFree, hidden);
+    this.setState({ ...hidden, form: { ...s.form, [key]: s.form[key].filter((x) => x !== m) } });
+    const inReport = s.editing && s.form[key].includes(m);
+    this.flash(inReport ? 'Removed from the list and from this report. Other reports keep it.' : 'Removed from the list. Past reports keep it.');
+  }
+  // Typing a removed choice again puts it back on the list.
+  shownAgain(f) {
+    return this.hiddenNow({
+      hiddenCats: this.state.hiddenCats.filter((m) => m !== f.catOther.trim() && !f.cats.includes(m)),
+      hiddenMeds: this.state.hiddenMeds.filter((m) => m !== f.medOther.trim() && !f.meds.includes(m)),
+      hiddenActs: this.state.hiddenActs.filter((m) => m !== f.actOther.trim() && !f.acts.includes(m)),
+      hiddenSenses: this.state.hiddenSenses.filter((m) => m !== f.senseOther.trim() && !f.senses.includes(m))
+    });
+  }
+  formChips(key, f) {
+    const list = this.choices(key);
+    return list.concat(f[key].filter((m) => !list.includes(m))).map((c) => ({
+      ...this.chip(c, f[key].includes(c), this.toggleForm(key, c)), removeAria: 'Remove ' + c + ' from the list', remove: () => this.hideChoice(key, c)
+    }));
+  }
   startEdit(r) {
     const s = this.state;
-    const split = (list, known) => ({ chosen: list.filter((v) => known.includes(v)), other: list.filter((v) => !known.includes(v)).join(', ') });
-    const meds = split(r.meds, this.MEDS), acts = split(r.acts, this.ACTS), senses = split(r.senses, this.SENSES);
     this.setState({
       editing: { id: r.id, date: r.date, tab: s.tab, homeDay: s.homeDay, draft: s.form },
       detailId: null, deleteArmed: false, composing: true, tab: 'home', homeDay: r.date, selected: r.points.slice(), ...this.resetZoom(),
       form: {
-        time: r.time, cats: r.cats.slice(), desc: r.desc, severity: r.severity, sevNote: r.sevNote,
-        meds: meds.chosen, medOther: meds.other, acts: acts.chosen, actOther: acts.other, senses: senses.chosen, senseOther: senses.other, concern: r.concern
+        time: r.time, cats: r.cats.slice(), catOther: '', desc: r.desc, severity: Math.max(1, r.severity), sevNote: r.sevNote,
+        meds: r.meds.slice(), medOther: '', acts: r.acts.slice(), actOther: '', senses: r.senses.slice(), senseOther: '', concern: r.concern
       }
     });
   }
@@ -1442,11 +2114,12 @@ class Component extends DCLogic {
     const s = this.state, f = s.form, e = s.editing;
     const extra = (list, other) => other.trim() ? list.concat([other.trim()]) : list;
     const reports = s.reports.map((r) => r.id !== e.id ? r : {
-      ...r, time: f.time, cats: f.cats, severity: Number(f.severity), points: s.selected, desc: f.desc, sevNote: f.sevNote,
+      ...r, time: f.time, cats: extra(f.cats, f.catOther), severity: Number(f.severity), points: s.selected, desc: f.desc, sevNote: f.sevNote,
       meds: extra(f.meds, f.medOther), acts: extra(f.acts, f.actOther), senses: extra(f.senses, f.senseOther), concern: f.concern
     });
-    this.saveData(reports, s.symptomFree);
-    this.setState({ reports: reports, ...this.endEdit(), detailId: e.id });
+    const hidden = this.shownAgain(f);
+    this.saveData(reports, s.symptomFree, hidden);
+    this.setState({ reports: reports, ...hidden, ...this.endEdit(), detailId: e.id });
     this.flash('Report updated');
   }
 
@@ -1455,15 +2128,17 @@ class Component extends DCLogic {
     const s = this.state, f = s.form;
     const extra = (list, other) => other.trim() ? list.concat([other.trim()]) : list;
     const rep = {
-      id: 'n' + Date.now(), date: s.homeDay, time: f.time, cats: f.cats, severity: Number(f.severity),
+      id: 'n' + Date.now(), date: s.homeDay, time: f.time, cats: extra(f.cats, f.catOther), severity: Number(f.severity),
       points: s.selected, desc: f.desc, sevNote: f.sevNote,
       meds: extra(f.meds, f.medOther), acts: extra(f.acts, f.actOther), senses: extra(f.senses, f.senseOther), concern: f.concern
     };
     const n = s.selected.length;
     const reports = [rep].concat(s.reports), symptomFree = s.symptomFree.filter((d) => d !== rep.date);
-    this.saveData(reports, symptomFree);
-    this.setState({ reports: reports, symptomFree: symptomFree, selected: [], form: this.blankForm(), composing: false, tab: 'home', ...this.resetZoom(), calDay: s.homeDay, calMonth: s.homeDay.slice(0, 7) });
-    this.flash('Report saved with ' + this.plural(n, 'point'));
+    const hidden = this.shownAgain(f);
+    this.saveData(reports, symptomFree, hidden);
+    this.setState({ reports: reports, symptomFree: symptomFree, ...hidden, selected: [], form: this.blankForm(), composing: false, tab: 'home', ...this.resetZoom(), calDay: s.homeDay, calMonth: s.homeDay.slice(0, 7) });
+    const nAreas = s.selected.filter((p) => p.path).length;
+    this.flash('Report saved with ' + [nAreas ? this.plural(nAreas, 'area') : '', n - nAreas ? this.plural(n - nAreas, 'point') : ''].filter(Boolean).join(' and '));
   }
 
   homeVals() {
@@ -1474,7 +2149,7 @@ class Component extends DCLogic {
     const idx = Math.round(Math.abs(yaw) / 5);
     const views = [['Front', 0], ['Right', 90], ['Back', 180], ['Left', -90]];
     const nearFront = Math.abs(yaw) < 50, nearBack = Math.abs(yaw) > 130;
-    const names = s.selected.map((p) => p.label);
+    const names = s.selected.map((p) => p.label), nAreas = s.selected.filter((p) => p.path).length;
     const zoom = onMap ? s.zoom : 1, panX = onMap ? s.panX : 0, panY = onMap ? s.panY : 0;
     const showGL = onMap && this.bodyLive();
     if (showGL) this.scheduleDraw();
@@ -1496,6 +2171,7 @@ class Component extends DCLogic {
       glDisplay: showGL ? 'block' : 'none',
       figLoad: (e) => { this.stageEl = e.currentTarget.closest('[data-stage]'); this.scheduleDraw(); },
       figTransform: 'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoom + ')',
+      figHalf: -this.figSize().w / 2,
       markScale: 1 / zoom,
       isZoomed: zoom > 1,
       zoomIn: (e) => this.zoomStep(e, 2),
@@ -1507,20 +2183,22 @@ class Component extends DCLogic {
       turnLeft: () => this.snapTo(this.normYaw(s.yaw - 30)),
       turnRight: () => this.snapTo(this.normYaw(s.yaw + 30)),
       mapHint: zoom > 1 ? 'Tap the exact spot. Drag to move around.' : 'Tap where you feel it. Drag to turn the body.',
-      mapHintSub: zoom > 1 ? 'Pinch or use the minus button to zoom back out.' : 'Pinch or use the plus button to zoom in on a finger or toe.',
+      mapHintSub: zoom > 1 ? 'Press and hold, then drag, to paint an area. Pinch or use minus to zoom out.' : 'Press and hold, then drag, to paint an area. Zoom in to paint fingers or toes.',
       bodyFlip: yaw < 0 ? 'scaleX(-1)' : 'none',
-      stageAria: 'Body model. Tap to mark a point. Drag or use the arrow keys to turn the body. Pinch or use plus and minus to zoom.',
+      stageAria: 'Body model. Tap to mark a point, or press and hold, then drag, to paint an area. Drag or use the arrow keys to turn the body. Pinch or use plus and minus to zoom.',
       stageDown: (e) => this.stageDown(e),
       stageMove: (e) => this.stageMove(e),
       stageUp: (e) => this.stageUp(e),
       stageCancel: (e) => this.stageCancel(e),
+      noMenu: (e) => e.preventDefault(),
       stageKey: (e) => this.stageKey(e),
+      areaPaths: !onMap || (showGL && !this.noGLPaint) ? [] : this.oblongs(s.selected.filter((p) => p.path).map((p) => ({ path: p.path, r: p.r })).concat(this.liveOblong()), yaw),
       pinButtons: !onMap ? [] : s.selected.map((p, i) => {
         const q = this.pos(p, yaw);
         const seen = this.isVisible(p, yaw);
         return {
           l: q.l, t: q.t, n: i + 1, hidden: !seen, size: !seen ? '22px' : zoom >= 2 ? '26px' : '32px', font: !seen || zoom >= 2 ? '12px' : '15px', opacity: seen ? 1 : 0.4, events: seen ? 'auto' : 'none',
-          aria: seen ? 'Remove point ' + (i + 1) + ', ' + p.label : 'Point ' + (i + 1) + ', ' + p.label + ', on the far side',
+          aria: (seen ? 'Remove ' : '') + (p.path ? 'area ' : 'point ') + (i + 1) + ', ' + p.label + (seen ? '' : ', on the far side'),
           // The click that follows a tap lands on the new pin; it must not remove it.
           remove: () => { if (Date.now() - (this.placedAt || 0) > 400) this.removePin(p.id); }
         };
@@ -1528,7 +2206,7 @@ class Component extends DCLogic {
       noneSelected: s.selected.length === 0,
       someSelected: s.selected.length > 0,
       homeBottom: s.selected.length > 0 ? '0px' : '80px',
-      selectedSummary: this.plural(s.selected.length, 'point') + ' marked · ' + names.join(', '),
+      selectedSummary: [nAreas ? this.plural(nAreas, 'area') : '', s.selected.length - nAreas ? this.plural(s.selected.length - nAreas, 'point') : ''].filter(Boolean).join(' and ') + ' marked · ' + names.join(', '),
       clearPins: () => this.setState(s.editing ? { ...this.endEdit(), detailId: s.editing.id } : { selected: [] }),
       startCompose: () => {
         const f = this.state.form;
@@ -1540,9 +2218,10 @@ class Component extends DCLogic {
 
   composeVals() {
     const s = this.state, f = s.form;
-    const noPts = s.selected.length === 0, noCat = f.cats.length === 0;
+    const noPts = s.selected.length === 0, noCat = f.cats.length === 0 && !f.catOther.trim();
     const hint = noPts ? 'Add at least one point on the body to save.' : noCat ? 'Choose at least one symptom or sensation type to save.' : '';
     const canSave = !noPts && !noCat;
+    const meds = this.formChips('meds', f), senses = this.formChips('senses', f);
     return {
       form: f,
       formPoints: s.selected.map((p, i) => ({ n: i + 1, label: p.label, aria: 'Remove ' + p.label, remove: () => this.removePin(p.id) })),
@@ -1557,15 +2236,22 @@ class Component extends DCLogic {
       setDesc: this.setForm('desc'),
       setSeverity: this.setForm('severity'),
       setSevNote: this.setForm('sevNote'),
-      setMedOther: this.setForm('medOther'),
-      setActOther: this.setForm('actOther'),
-      setSenseOther: this.setForm('senseOther'),
+      setMedOther: this.addTyped('meds', 'medOther'),
+      setActOther: this.addTyped('acts', 'actOther'),
+      setSenseOther: this.addTyped('senses', 'senseOther'),
       setConcern: this.setForm('concern'),
       severityWord: this.sevWord(f.severity),
-      catChips: this.CATS.map((c) => this.chip(c, f.cats.includes(c), this.toggleForm('cats', c))),
-      medChips: this.MEDS.map((c) => this.chip(c, f.meds.includes(c), this.toggleForm('meds', c))),
-      actChips: this.ACTS.map((c) => this.chip(c, f.acts.includes(c), this.toggleForm('acts', c))),
-      senseChips: this.SENSES.map((c) => this.chip(c, f.senses.includes(c), this.toggleForm('senses', c))),
+      catChips: this.formChips('cats', f),
+      setCatOther: this.addTyped('cats', 'catOther'),
+      medChips: meds,
+      hasMedChips: meds.length > 0,
+      noMedChips: meds.length === 0,
+      medInputLabel: meds.length ? 'Other medicine or dose' : 'Medicine and dose',
+      actChips: this.formChips('acts', f),
+      senseChips: senses,
+      hasSenseChips: senses.length > 0,
+      noSenseChips: senses.length === 0,
+      senseInputLabel: senses.length ? 'Something else you noticed' : 'Anything else you noticed',
       saveHintShow: !canSave,
       saveHint: hint,
       saveDisabled: !canSave,
@@ -1612,7 +2298,7 @@ class Component extends DCLogic {
       setTimeout(() => this.makeThumbs(), 0);
     }
     const dayList = visible.filter((x) => x.r.date === s.calDay).sort((a, b) => a.r.time.localeCompare(b.r.time));
-    const dots = (front) => dayList.reduce((a, x) => a.concat(x.pts.filter((p) => (p.n[2] >= 0) === front)), []).map((p) => this.pos(p, front ? 0 : 180));
+    const dots = (front) => dayList.reduce((a, x) => a.concat(x.pts.reduce((b, p) => b.concat(p.path || [p]), []).filter((p) => (p.n[2] >= 0) === front)), []).map((p) => this.pos(p, front ? 0 : 180));
     const shiftMonth = (n) => () => {
       const dt = new Date(parts[0], parts[1] - 1 + n, 1);
       this.setState({ calMonth: this.iso(dt).slice(0, 7) });
@@ -1653,7 +2339,7 @@ class Component extends DCLogic {
     const from = this.addDays(this.TODAY, -(range - 1));
     const inRange = s.reports.filter((r) => r.date >= from && r.date <= this.TODAY);
     const mean = (list) => list.length ? (list.reduce((a, r) => a + r.severity, 0) / list.length).toFixed(1) : '0';
-    const groups = this.CATS.map((c) => ({ cat: c, list: inRange.filter((r) => r.cats.includes(c)) })).filter((g) => g.list.length > 0).sort((a, b) => b.list.length - a.list.length);
+    const groups = Array.from(new Set([].concat(...inRange.map((r) => r.cats)))).map((c) => ({ cat: c, list: inRange.filter((r) => r.cats.includes(c)) })).filter((g) => g.list.length > 0).sort((a, b) => b.list.length - a.list.length);
     const freeDays = s.symptomFree.filter((d) => d >= from && d <= this.TODAY && !inRange.some((r) => r.date === d)).length;
     return { from, inRange, days: new Set(inRange.map((r) => r.date)).size, freeDays, mean, avg: mean(inRange), groups };
   }

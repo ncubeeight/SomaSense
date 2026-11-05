@@ -16,7 +16,7 @@ SomaSense saves the following in its private storage on your phone:
 
 - Your reports: date, time, symptom or sensation types, body locations, severity, descriptions and notes, medicines, physical activity, other sensations and concerns
 - The days you mark as symptom-free
-- Your body shape setting
+- Your settings: body shape and any symptom types, medicines, activities or sensations you remove from the lists of choices
 
 This can include health information, so please keep it in mind when you decide who can use your phone.
 
