@@ -2562,6 +2562,17 @@ class Component extends DCLogic {
         text(c, t[1], x + 16, y + 98, font(400, 20), SOFT);
       });
     });
+    // The period as a calendar, week by week; days around it are greyed out.
+    const start = this.weekStart(data.from), weeks = Math.ceil((Math.round((this.parse(this.TODAY) - this.parse(start)) / 864e5) + 1) / 7);
+    const calH = 104;
+    block(70, (c, y) => text(c, 'Calendar', M, y + 50, font(700, 36), INK), true);
+    // Up to nine weeks fit under the summary on the first page, and twelve on a page after that.
+    for (let w = 0; w < weeks; ) {
+      const n = Math.min(w ? 12 : 9, weeks - w), at = w;
+      block(50 + n * calH + 12, (c, y) => this.drawWeekGrid(c, y, this.addDays(start, at * 7), n, calH, data.from, this.TODAY), at + n >= weeks);
+      w += n;
+    }
+    block(80, (c, y) => this.drawCalKey(c, y + 12));
     block(92, (c, y) => {
       text(c, 'How often, by type', M, y + 40, font(700, 36), INK);
       text(c, 'A report with two types counts once in each.', M, y + 76, font(400, 23), SOFT);
@@ -2617,6 +2628,91 @@ class Component extends DCLogic {
     data.groups.forEach((g) => lines.push(g.cat + ': ' + this.plural(g.list.length, 'report') + ', average severity ' + data.mean(g.list)));
     return lines.join('\n');
   }
+  // Rows of weeks a month needs.
+  calGridHeight(month, cellH) {
+    const parts = month.split('-').map(Number);
+    const lead = new Date(parts[0], parts[1] - 1, 1).getDay(), daysIn = new Date(parts[0], parts[1], 0).getDate();
+    return 50 + Math.ceil((lead + daysIn) / 7) * cellH;
+  }
+  // One day as it looks in the Calendar tab. A day outside the period is greyed out.
+  drawDayCell(c, x, top, cellW, cellH, key, label, out) {
+    const { font, text, INK, LINE } = this.pdfTools();
+    const dayList = out ? [] : this.state.reports.filter((r) => r.date === key);
+    const max = dayList.reduce((m, r) => Math.max(m, r.severity), 0);
+    const free = !out && !dayList.length && this.state.symptomFree.includes(key);
+    c.fillStyle = free ? '#8EDB8F' : !dayList.length ? '#FFFFFF' : max <= 3 ? '#D6ECEC' : max <= 6 ? '#86C6C4' : '#0B6169';
+    c.strokeStyle = out ? '#E9EEEE' : LINE;
+    c.lineWidth = 2;
+    c.beginPath();
+    c.roundRect(x + 4, top + 4, cellW - 8, cellH - 8, 14);
+    c.fill();
+    c.stroke();
+    const fg = out ? '#A5B4B5' : dayList.length && max > 6 ? '#FFFFFF' : INK;
+    c.textAlign = 'center';
+    text(c, label, x + cellW / 2, top + cellH * 0.46, font(700, label.length > 2 ? 26 : 30), fg);
+    if (dayList.length) text(c, this.plural(dayList.length, 'report'), x + cellW / 2, top + cellH * 0.76, font(400, 21), fg);
+    c.textAlign = 'left';
+    if (free) {
+      c.strokeStyle = INK;
+      c.lineWidth = 4;
+      c.lineCap = 'round';
+      c.lineJoin = 'round';
+      const cx = x + cellW / 2, cy = top + cellH * 0.7;
+      c.beginPath();
+      c.moveTo(cx - 13, cy);
+      c.lineTo(cx - 4, cy + 9);
+      c.lineTo(cx + 13, cy - 9);
+      c.stroke();
+    }
+  }
+  drawWeekdays(c, y) {
+    const { W, M, font, text, SOFT } = this.pdfTools();
+    const cellW = (W - 2 * M) / 7;
+    c.textAlign = 'center';
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((d, i) => text(c, d, M + cellW * (i + 0.5), y + 34, font(700, 24), SOFT));
+    c.textAlign = 'left';
+  }
+  // A month as it looks in the Calendar tab.
+  drawCalGrid(c, y, month, cellH) {
+    const { W, M } = this.pdfTools();
+    const parts = month.split('-').map(Number);
+    const lead = new Date(parts[0], parts[1] - 1, 1).getDay(), daysIn = new Date(parts[0], parts[1], 0).getDate();
+    const cellW = (W - 2 * M) / 7;
+    this.drawWeekdays(c, y);
+    for (let d = 1; d <= daysIn; d++) {
+      const at = lead + d - 1;
+      this.drawDayCell(c, M + (at % 7) * cellW, y + 50 + Math.floor(at / 7) * cellH, cellW, cellH, month + '-' + String(d).padStart(2, '0'), String(d), false);
+    }
+  }
+  // Whole weeks from the Sunday on or before `from`; the first of a month and the first cell name the month.
+  weekStart(from) { return this.addDays(from, -this.parse(from).getDay()); }
+  drawWeekGrid(c, y, start, weeks, cellH, from, to) {
+    const { W, M } = this.pdfTools();
+    const cellW = (W - 2 * M) / 7;
+    this.drawWeekdays(c, y);
+    for (let i = 0; i < weeks * 7; i++) {
+      const key = this.addDays(start, i), d = Number(key.slice(8));
+      const label = d === 1 || i === 0 ? this.fmtShort(key) : String(d);
+      this.drawDayCell(c, M + (i % 7) * cellW, y + 50 + Math.floor(i / 7) * cellH, cellW, cellH, key, label, key < from || key > to);
+    }
+  }
+  drawCalKey(c, y) {
+    const { M, font, SOFT, LINE } = this.pdfTools();
+    let x = M;
+    [['#FFFFFF', 'No entry'], ['#8EDB8F', 'No symptoms'], ['#D6ECEC', 'Mild (1–3)'], ['#86C6C4', 'Moderate (4–6)'], ['#0B6169', 'Severe (7–10)']].forEach((k) => {
+      c.fillStyle = k[0];
+      c.strokeStyle = LINE;
+      c.lineWidth = 2;
+      c.beginPath();
+      c.roundRect(x, y, 28, 28, 6);
+      c.fill();
+      c.stroke();
+      c.font = font(400, 23);
+      c.fillStyle = SOFT;
+      c.fillText(k[1], x + 36, y + 22);
+      x += 36 + c.measureText(k[1]).width + 30;
+    });
+  }
   sharePages(month) {
     const { W, M, font, wrap, text, INK, SOFT, LINE } = this.pdfTools();
     const parts = month.split('-').map(Number);
@@ -2635,56 +2731,10 @@ class Component extends DCLogic {
     });
 
     // The calendar picture.
-    const cellW = (W - 2 * M) / 7, cellH = 118, lead = first.getDay();
-    const rows = Math.ceil((lead + daysIn) / 7);
-    block(50 + rows * cellH + 90, (c, y) => {
-      c.textAlign = 'center';
-      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((d, i) => text(c, d, M + cellW * (i + 0.5), y + 34, font(700, 24), SOFT));
-      for (let d = 1; d <= daysIn; d++) {
-        const key = month + '-' + String(d).padStart(2, '0');
-        const dayList = this.state.reports.filter((r) => r.date === key);
-        const max = dayList.reduce((m, r) => Math.max(m, r.severity), 0);
-        const free = !dayList.length && this.state.symptomFree.includes(key);
-        const at = lead + d - 1, x = M + (at % 7) * cellW, top = y + 50 + Math.floor(at / 7) * cellH;
-        c.fillStyle = free ? '#8EDB8F' : !dayList.length ? '#FFFFFF' : max <= 3 ? '#D6ECEC' : max <= 6 ? '#86C6C4' : '#0B6169';
-        c.strokeStyle = LINE;
-        c.lineWidth = 2;
-        c.beginPath();
-        c.roundRect(x + 4, top + 4, cellW - 8, cellH - 8, 14);
-        c.fill();
-        c.stroke();
-        const fg = dayList.length && max > 6 ? '#FFFFFF' : INK;
-        text(c, String(d), x + cellW / 2, top + 54, font(700, 30), fg);
-        if (dayList.length) text(c, this.plural(dayList.length, 'report'), x + cellW / 2, top + 90, font(400, 21), fg);
-        if (free) {
-          c.strokeStyle = INK;
-          c.lineWidth = 4;
-          c.lineCap = 'round';
-          c.lineJoin = 'round';
-          const cx = x + cellW / 2, cy = top + 82;
-          c.beginPath();
-          c.moveTo(cx - 13, cy);
-          c.lineTo(cx - 4, cy + 9);
-          c.lineTo(cx + 13, cy - 9);
-          c.stroke();
-        }
-      }
-      c.textAlign = 'left';
-      let x = M;
-      const keyTop = y + 50 + rows * cellH + 22;
-      [['#FFFFFF', 'No entry'], ['#8EDB8F', 'No symptoms'], ['#D6ECEC', 'Mild (1–3)'], ['#86C6C4', 'Moderate (4–6)'], ['#0B6169', 'Severe (7–10)']].forEach((k) => {
-        c.fillStyle = k[0];
-        c.strokeStyle = LINE;
-        c.lineWidth = 2;
-        c.beginPath();
-        c.roundRect(x, keyTop, 28, 28, 6);
-        c.fill();
-        c.stroke();
-        c.font = font(400, 23);
-        c.fillStyle = SOFT;
-        c.fillText(k[1], x + 36, keyTop + 22);
-        x += 36 + c.measureText(k[1]).width + 30;
-      });
+    const cellH = 118;
+    block(this.calGridHeight(month, cellH) + 90, (c, y) => {
+      this.drawCalGrid(c, y, month, cellH);
+      this.drawCalKey(c, y + this.calGridHeight(month, cellH) + 22);
     });
 
     // Entries, in the same format as a report in the app.
