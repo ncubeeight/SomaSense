@@ -400,7 +400,7 @@ body{margin:0}
           </span>
         </sc-for>
       </div>
-      <input type="text" aria-label="Other type" value="{{form.catOther}}" onChange="{{setCatOther}}" placeholder="Other type" style="width: 100%; height: 44px; margin-top: 8px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+      <input type="text" aria-label="Other type" value="{{form.catOther}}" onChange="{{setCatOther}}" onKeyDown="{{commitCat}}" onBlur="{{commitCat}}" enterkeyhint="done" placeholder="Other type" style="width: 100%; height: 44px; margin-top: 8px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
     </section>
 
     <section>
@@ -437,7 +437,7 @@ body{margin:0}
         </sc-for>
       </div>
       </sc-if>
-      <input type="text" aria-label="{{medInputLabel}}" value="{{form.medOther}}" onChange="{{setMedOther}}" placeholder="{{medInputLabel}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+      <input type="text" aria-label="{{medInputLabel}}" value="{{form.medOther}}" onChange="{{setMedOther}}" onKeyDown="{{commitMed}}" onBlur="{{commitMed}}" enterkeyhint="done" placeholder="{{medInputLabel}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
     </section>
 
     <section>
@@ -452,7 +452,7 @@ body{margin:0}
           </span>
         </sc-for>
       </div>
-      <input type="text" aria-label="Other activity" value="{{form.actOther}}" onChange="{{setActOther}}" placeholder="Other activity" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
+      <input type="text" aria-label="Other activity" value="{{form.actOther}}" onChange="{{setActOther}}" onKeyDown="{{commitAct}}" onBlur="{{commitAct}}" enterkeyhint="done" placeholder="Other activity" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; color: #14282C; font: inherit">
     </section>
 
     <section>
@@ -472,7 +472,7 @@ body{margin:0}
         </sc-for>
       </div>
       </sc-if>
-      <input type="text" aria-label="{{senseInputLabel}}" value="{{form.senseOther}}" onChange="{{setSenseOther}}" placeholder="{{senseInputLabel}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 15px">
+      <input type="text" aria-label="{{senseInputLabel}}" value="{{form.senseOther}}" onChange="{{setSenseOther}}" onKeyDown="{{commitSense}}" onBlur="{{commitSense}}" enterkeyhint="done" placeholder="{{senseInputLabel}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 12px; border: 1px solid #C4D0D0; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 15px">
     </section>
 
     <section>
@@ -985,10 +985,14 @@ class Component extends DCLogic {
   }
 
   setForm(key) { return (e) => { const v = e.target.value; this.setState((s) => ({ form: { ...s.form, [key]: v } })); }; }
-  // A typed entry becomes a chosen bubble as soon as it's entered; saving the report keeps it for next time.
-  addTyped(key, field) {
+  // A typed entry becomes a chosen bubble when it's finished: Enter (the keyboard's Done key) or leaving the field.
+  // The template's onChange fires on every keystroke, so it only keeps the text. Saving the report keeps the entry for next time.
+  commitTyped(key, field) {
     return (e) => {
+      if (e.type === 'keydown' && e.key !== 'Enter' && e.keyCode !== 13) return;
+      if (e.type === 'keydown') e.preventDefault();
       const typed = e.target.value.split(',').map((v) => v.trim()).filter(Boolean);
+      if (!typed.length) return;
       this.setState((s) => {
         const list = s.form[key].slice();
         typed.forEach((v) => { if (!list.includes(v)) list.push(v); });
@@ -2236,13 +2240,17 @@ class Component extends DCLogic {
       setDesc: this.setForm('desc'),
       setSeverity: this.setForm('severity'),
       setSevNote: this.setForm('sevNote'),
-      setMedOther: this.addTyped('meds', 'medOther'),
-      setActOther: this.addTyped('acts', 'actOther'),
-      setSenseOther: this.addTyped('senses', 'senseOther'),
+      setMedOther: this.setForm('medOther'),
+      commitMed: this.commitTyped('meds', 'medOther'),
+      setActOther: this.setForm('actOther'),
+      commitAct: this.commitTyped('acts', 'actOther'),
+      setSenseOther: this.setForm('senseOther'),
+      commitSense: this.commitTyped('senses', 'senseOther'),
       setConcern: this.setForm('concern'),
       severityWord: this.sevWord(f.severity),
       catChips: this.formChips('cats', f),
-      setCatOther: this.addTyped('cats', 'catOther'),
+      setCatOther: this.setForm('catOther'),
+      commitCat: this.commitTyped('cats', 'catOther'),
       medChips: meds,
       hasMedChips: meds.length > 0,
       noMedChips: meds.length === 0,
