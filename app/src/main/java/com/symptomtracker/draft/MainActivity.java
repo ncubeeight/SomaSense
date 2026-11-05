@@ -240,7 +240,7 @@ public class MainActivity extends Activity {
     }
 
     private Uri shareUri(File file) {
-        return new Uri.Builder().scheme("content").authority(ShareProvider.AUTHORITY).appendPath(file.getName()).build();
+        return new Uri.Builder().scheme("content").authority(ShareProvider.authority(this)).appendPath(file.getName()).build();
     }
 
     private void clearShareFiles() {

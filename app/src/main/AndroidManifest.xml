@@ -23,7 +23,7 @@
         </activity>
         <provider
             android:name=".ShareProvider"
-            android:authorities="com.symptomtracker.draft.share"
+            android:authorities="${applicationId}.share"
             android:exported="false"
             android:grantUriPermissions="true" />
     </application>

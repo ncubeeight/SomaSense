@@ -13,7 +13,9 @@ import java.io.FileNotFoundException;
 
 /** Hands the current shared files to the app the person picks, read-only and only for that share. */
 public class ShareProvider extends ContentProvider {
-    static final String AUTHORITY = "com.symptomtracker.draft.share";
+    static String authority(android.content.Context c) {
+        return c.getPackageName() + ".share";
+    }
     static final String DIR = "share";
 
     private File fileFor(Uri uri) {
