@@ -20,7 +20,7 @@ Your log stays on your phone unless you choose to share it. Read the [SomaSense 
 
 SomaSense was authored by ncubeeight LLC for distribution on Github, Apple App Store and Android Play Store. Visit ncubeeight at [ncubeeight.com](https://ncubeeight.com)
 
-If code is forked please attribute [ncubeeight.github.io/SomaSense](https://ncubeeight.github.io/SomaSense/)
+The code on GitHub is open source under the Apache 2.0 license, which lets you use, modify and share it under that license's terms. If the code base is altered from original form into a new code-fork or integrated into a new app, please attribute [ncubeeight.github.io/SomaSense](https://ncubeeight.github.io/SomaSense/) source code referring to open source under Apache 2.0 license but clarify how the code has been altered to your own users with your own new Privacy Policy. The original Privacy Policy should not be used for code created by other entities outside of ncubeeight LLC. Please include the reference to MakeHuman license in all derivative code if the body map is integrated into your versions of this app.
 
 SomaSense was coded in ClaudeCode with supplemental support by Apple Xcode and Google Play Console, with additional support by Google Gemini for marketing collateral design.
 
