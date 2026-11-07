@@ -6,7 +6,7 @@ layout: default
 
 SomaSense is a free and open source calendar tool for logging symptoms and sensations that are felt across the body. All data entered into the application is stored locally without being transmitted to the developer or the hardware provider. You may share your own calendar log to email or other tools you have on device by selecting the Share option available in your calendar.
 
-Use SomaSense to track feelings you have across the body over time and to monitor their progression or transience. When used for tracking pain or other unexpected physical stimuli the tool can be used to create a log of a symptom’s progression for sharing with a physician. Please seek immediate care if you have a new symptom you haven’t addressed with your healthcare provider previously.
+Use SomaSense to track feelings you have across the body over time and to monitor their progression or transience. When noticing any new or unusual pain or symptom the tool can be used to create a log of a symptom’s progression for sharing with a physician. Please seek immediate care if you have a new symptom you haven’t addressed with your healthcare provider previously.
 
 ## Body shape
 
