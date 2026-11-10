@@ -50,7 +50,7 @@ Upload the `.aab` under **Test and release → Testing → Internal testing** fi
   sips --cropToHeightWidth 2160 1080 shot.png --out shot-play.png
   ```
   Use sample data, not your real entries.
-- **Feature graphic:** 1024 × 500, required. Not made yet.
+- **Feature graphic:** `play/feature-graphic.jpg`, 1024 × 500 JPEG with no transparency. It reuses the splash art: the emblem, wordmark and tagline, side by side.
 
 ## Before production
 
