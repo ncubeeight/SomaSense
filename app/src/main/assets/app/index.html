@@ -320,7 +320,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
       </sc-if>
     </div>
   </sc-if>
-  <div style="padding: 0 20px 20px; font-size: 13px; color: #4F6368">Sample data. This log is a record to share with your clinician. It does not diagnose or give medical advice.</div>
+  <div style="padding: 0 20px 20px; font-size: 13px; color: #4F6368">{{sampleNote}}This log is a record to share with your clinician. It does not diagnose or give medical advice.</div>
 </div>
 </sc-if>
 
@@ -2387,6 +2387,8 @@ class Component extends DCLogic {
     const active = groups.find((g) => g.cat === s.drillCat) || groups[0];
     const out = {
       exportPdf: () => this.openReportShare(),
+      // Only the prototype shows sample entries; the installed app shows the person's own.
+      sampleNote: this.live ? '' : 'Sample data. ',
       rangeChips: [7, 30, 90].map((n) => this.chip(n + ' days', s.range === n, () => this.setState({ range: n }))),
       statTiles: [
         { value: inRange.length, label: 'Reports' },
