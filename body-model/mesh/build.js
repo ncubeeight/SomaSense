@@ -40,12 +40,17 @@ function applyTarget(rel, w) {
 const MALE = Number(process.env.BODY_MALE || 0.5);
 const WEIGHT_UP = Number(process.env.BODY_WEIGHT_UP || 0.22); // share of MakeHuman's heavier target, for a population-average build rather than a slim one
 const WEIGHT_DOWN = Number(process.env.BODY_WEIGHT_DOWN || 0); // share of MakeHuman's lighter target
+const MUSCLE_UP = Number(process.env.BODY_MUSCLE_UP || 0); // share of MakeHuman's max-muscle targets, for a firmer, flatter chest
 for (const g of ['female', 'male']) {
   const share = g === 'male' ? MALE : 1 - MALE;
   if (!share) continue;
-  applyTarget(`macrodetails/universal-${g}-young-averagemuscle-averageweight.target`, share * (1 - WEIGHT_UP - WEIGHT_DOWN));
-  applyTarget(`macrodetails/universal-${g}-young-averagemuscle-maxweight.target`, share * WEIGHT_UP);
-  if (WEIGHT_DOWN) applyTarget(`macrodetails/universal-${g}-young-averagemuscle-minweight.target`, share * WEIGHT_DOWN);
+  const mix = (muscle, s) => {
+    applyTarget(`macrodetails/universal-${g}-young-${muscle}-averageweight.target`, s * (1 - WEIGHT_UP - WEIGHT_DOWN));
+    applyTarget(`macrodetails/universal-${g}-young-${muscle}-maxweight.target`, s * WEIGHT_UP);
+    if (WEIGHT_DOWN) applyTarget(`macrodetails/universal-${g}-young-${muscle}-minweight.target`, s * WEIGHT_DOWN);
+  };
+  mix('averagemuscle', share * (1 - MUSCLE_UP));
+  if (MUSCLE_UP) mix('maxmuscle', share * MUSCLE_UP);
   for (const r of ['african', 'asian', 'caucasian']) applyTarget(`macrodetails/${r}-${g}-young.target`, share / 3);
 }
 

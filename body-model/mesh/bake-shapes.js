@@ -6,7 +6,8 @@ const { execFileSync } = require('child_process');
 const [DATA, TMP] = process.argv.slice(2);
 const VARIANTS = {
   f: { BODY_MALE: '0', BODY_CHEST_W: '0', BODY_CHEST_R: '0.8' },
-  m: { BODY_MALE: '1', BODY_CHEST_W: '0' },
+  // Less of the heavier target, more of the muscular one and a wider chest rebuild, for a flat, typical male chest.
+  m: { BODY_MALE: '1', BODY_CHEST_W: '0', BODY_WEIGHT_UP: '0.1', BODY_MUSCLE_UP: '0.8', BODY_CHEST_R: '0.65' },
   s: { BODY_WEIGHT_UP: '0', BODY_WEIGHT_DOWN: '1' },
   h: { BODY_WEIGHT_UP: '1' }
 };
